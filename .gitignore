@@ -12,6 +12,6 @@ bin/
 local.properties
 *.log
 !.mvn/wrapper/maven-wrapper.jar
-gradle/wrapper/gradle-wrapper.jar
+# gradle/wrapper/gradle-wrapper.jar  # DO NOT IGNORE - Gradle wrapper jar should be committed!
 
 
