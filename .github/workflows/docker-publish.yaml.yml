@@ -31,8 +31,8 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
-      - name: Run unit tests only
-        run: ./gradlew test --tests '*Test' --tests '*Tests' -x integrationTest
+      - name: Run unit tests
+        run: ./gradlew test
         continue-on-error: false
 
       - name: Upload test results
