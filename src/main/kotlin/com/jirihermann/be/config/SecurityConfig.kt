@@ -3,6 +3,7 @@ package com.jirihermann.be.config
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.core.env.Environment
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
@@ -30,11 +31,10 @@ class SecurityConfig(
   @Value("\${security.cors.max-age:3600}")
   private val corsMaxAge: Long = 3600,
   
-  @Value("\${spring.profiles.active:default}")
-  private val activeProfile: String,
-  
   @Value("\${security.cors.enabled:true}")
-  private val corsEnabled: Boolean = true
+  private val corsEnabled: Boolean = true,
+  
+  private val environment: Environment
 ) {
 
   @Bean
@@ -143,7 +143,8 @@ class SecurityConfig(
     
     origins.forEach { origin ->
       // Validate origins in production
-      if (activeProfile == "prod" && !origin.startsWith("https://")) {
+      val isProduction = environment.activeProfiles.contains("prod")
+      if (isProduction && !origin.startsWith("https://")) {
         throw IllegalStateException("Production environment requires HTTPS origins. Invalid: $origin")
       }
       config.addAllowedOrigin(origin)
