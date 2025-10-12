@@ -38,5 +38,8 @@ management:
         enabled: true
 
 security:
-  allowed-origins: ${ALLOWED_ORIGINS:http://localhost:3333,http://localhost:3335}
+  allowed-origins: ${ALLOWED_ORIGINS:http://localhost:3000,http://localhost:3333}
+  cors:
+    enabled: ${CORS_ENABLED:true}
+    max-age: 3600
 

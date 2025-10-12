@@ -1,7 +1,7 @@
 # ---- Build ----
 FROM gradle:8.10-jdk21-alpine AS build
 WORKDIR /workspace
-COPY gradlew gradle.properties settings.gradle.kts build.gradle.kts ./
+COPY gradlew settings.gradle.kts build.gradle.kts ./
 COPY gradle ./gradle
 RUN ./gradlew --version
 COPY src ./src
