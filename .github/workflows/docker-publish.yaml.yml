@@ -133,10 +133,10 @@ jobs:
             cd /opt/jiri-site
             
             echo "Pulling latest image..."
-            docker compose pull
+            docker compose pull backend
             
             echo "Deploying new version..."
-            docker compose up -d
+            docker compose up backend -d
             
             echo "Waiting for service to start..."
             sleep 15
@@ -147,7 +147,7 @@ jobs:
             else
               echo "❌ Health check failed!"
               echo "Attempting to view logs..."
-              docker compose logs backend --tail=50
+              docker compose logs backend --tail=100
               exit 1
             fi
             

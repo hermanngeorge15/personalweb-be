@@ -1,5 +1,6 @@
 package com.jirihermann.be.config
 
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -24,18 +25,19 @@ import reactor.core.publisher.Mono
 
 @Configuration
 @EnableWebFluxSecurity
-class SecurityConfig(
+open class SecurityConfig {
+
   @Value("\${security.allowed-origins:http://localhost:3000,http://localhost:3333}")
-  private val allowedOrigins: String,
+  private lateinit var allowedOrigins: String
   
   @Value("\${security.cors.max-age:3600}")
-  private val corsMaxAge: Long = 3600,
+  private var corsMaxAge: Long = 3600
   
   @Value("\${security.cors.enabled:true}")
-  private val corsEnabled: Boolean = true,
+  private var corsEnabled: Boolean = true
   
-  private val environment: Environment
-) {
+  @Autowired
+  private lateinit var environment: Environment
 
   @Bean
   fun filterChain(http: ServerHttpSecurity): SecurityWebFilterChain =
