@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: be
+  annotations:
+    kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+    - host: be.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: be
+                port:
+                  number: 80
+

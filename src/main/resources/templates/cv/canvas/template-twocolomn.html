@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>First Last – CV</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg:#fff; --txt:#0f172a; --muted:#475569; --line:#e2e8f0; --accent:#2563eb; }
+    *{ box-sizing:border-box; }
+    html,body{ margin:0; padding:0; background:#f8fafc; color:var(--txt); font: 13.8px/1.45 "Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+    .sheet{ max-width:960px; margin:20px auto; background:var(--bg); }
+    header{ padding:24px 28px; border-bottom:1px solid var(--line); }
+    h1{ margin:0 0 6px 0; font-size:26px; }
+    .meta{ color:var(--muted); display:flex; flex-wrap:wrap; gap:10px 16px; }
+    .grid{ display:grid; grid-template-columns: 260px 1fr; gap: 0; }
+    aside{ border-right:1px solid var(--line); padding:18px 20px; }
+    main{ padding:18px 24px; }
+    h2{ font-size: 13px; letter-spacing:1px; text-transform:uppercase; color:var(--accent); margin:18px 0 8px 0; }
+    .block{ margin-bottom:12px; }
+    .orgline{ display:flex; justify-content:space-between; gap:12px; }
+    .orgline h3{ margin:0; font-size:15px; }
+    .when{ white-space:nowrap; color:var(--muted); }
+    ul{ margin:6px 0 0 0; padding-left:18px; }
+    li{ margin:3px 0; }
+    .tag{ display:inline-block; padding:3px 8px; border:1px solid var(--line); border-radius:999px; font-size:12px; margin:2px 6px 2px 0; color:#1f2937; }
+    a{ color:#0369a1; text-decoration:none; }
+    a:hover{ text-decoration:underline; }
+    @page{ size: A4; margin:14mm; }
+    @media print{
+      body{ background:#fff; }
+      .sheet{ margin:0; }
+      a{ color:inherit; text-decoration:none; }
+    }
+    @media (max-width:860px){ .grid{ grid-template-columns:1fr; } aside{ border-right:none; border-bottom:1px solid var(--line); } }
+  </style>
+</head>
+<body>
+  <div class="sheet">
+    <header>
+      <h1>First Last</h1>
+      <div class="meta">
+        <span>Praha, Česko</span>
+        <span>•</span>
+        <a href="mailto:email@example.com">email@example.com</a>
+        <span>•</span>
+        <a href="https://github.com/username">github.com/username</a>
+        <span>•</span>
+        <a href="https://www.linkedin.com/in/username">linkedin.com/in/username</a>
+      </div>
+    </header>
+    <div class="grid">
+      <aside>
+        <h2>Summary</h2>
+        <p>Senior backend developer specializing in Kotlin/Spring WebFlux, secure SSE, and observability. Optimizes performance and reliability in high-scale microservices.</p>
+
+        <h2>Skills</h2>
+        <div>
+          <span class="tag">Kotlin</span>
+          <span class="tag">Spring Boot</span>
+          <span class="tag">WebFlux</span>
+          <span class="tag">R2DBC</span>
+          <span class="tag">PostgreSQL</span>
+          <span class="tag">Docker</span>
+          <span class="tag">Keycloak</span>
+          <span class="tag">OAuth2</span>
+          <span class="tag">Prometheus</span>
+          <span class="tag">Grafana</span>
+        </div>
+
+        <h2>Education</h2>
+        <div class="block">
+          <div class="orgline">
+            <h3>CTU, BSc CS</h3>
+            <div class="when">2015–2018</div>
+          </div>
+          <ul>
+            <li>Distributed systems, security, databases.</li>
+          </ul>
+        </div>
+
+        <h2>Languages</h2>
+        <ul>
+          <li>Czech (native)</li>
+          <li>English (C1)</li>
+        </ul>
+      </aside>
+      <main>
+        <h2>Experience</h2>
+        <div class="block">
+          <div class="orgline">
+            <h3>Senior Backend Engineer • ACME</h3>
+            <div class="when">2022–Present</div>
+          </div>
+          <ul>
+            <li>Led migration to reactive stack with WebFlux, doubling throughput.</li>
+            <li>Implemented secure BFF with SSE + OAuth2/Keycloak.</li>
+            <li>Deployed Micrometer/Prometheus/Grafana; reduced MTTR by 40%.</li>
+          </ul>
+        </div>
+
+        <div class="block">
+          <div class="orgline">
+            <h3>Backend Engineer • FooBar</h3>
+            <div class="when">2019–2022</div>
+          </div>
+          <ul>
+            <li>Built multi-tenant R2DBC Postgres services with Flyway.</li>
+            <li>Optimized connection pools and timeouts; eliminated ReadTimeout spikes.</li>
+          </ul>
+        </div>
+
+        <h2>Projects</h2>
+        <div class="block">
+          <div class="orgline">
+            <h3>Reactive SSE Gateway</h3>
+            <div class="when">2024</div>
+          </div>
+          <ul>
+            <li>Token-bound SSE channels; OTel tracing; p95 < 80ms @ 5k conns.</li>
+          </ul>
+        </div>
+
+        <h2>Certifications</h2>
+        <ul>
+          <li>CKA – 2023</li>
+        </ul>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

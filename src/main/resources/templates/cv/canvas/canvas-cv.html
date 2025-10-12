@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8" />
+    <title th:text="${resume.fullName} + ' – Resume'">John Doe – Resume</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+        /* Prefer Roboto; fall back to common sans-serifs. If Roboto is installed locally, it will be used. */
+        @font-face {
+            font-family: 'Roboto';
+            src: local('Roboto Regular'), local('Roboto-Regular'), local('Roboto');
+            font-weight: 400; font-style: normal;
+        }
+        @font-face {
+            font-family: 'Roboto';
+            src: local('Roboto Medium'), local('Roboto-Medium');
+            font-weight: 500; font-style: normal;
+        }
+        @font-face {
+            font-family: 'Roboto';
+            src: local('Roboto Bold'), local('Roboto-Bold');
+            font-weight: 700; font-style: normal;
+        }
+        :root{
+            --fg:#1f2328;         /* primary text */
+            --muted:#6b7280;      /* secondary text */
+            --rule:#e5e7eb;       /* separators */
+            --accent:#2563eb;     /* links/chips */
+            --h:#0b1220;          /* headings */
+            --bg:#ffffff;         /* paper */
+            --chip-bg:#f3f6fc;    /* soft accent */
+        }
+        @page { size: A4; margin: 18mm 16mm; }
+        *{ box-sizing:border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        body{
+            margin:0; color:var(--fg); background:var(--bg);
+            font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            font-size: 11pt; line-height: 1.55;
+        }
+        .container{ max-width: 820px; margin: 0 auto; }
+        header{
+            display:flex; gap:22px; align-items:flex-start; justify-content:space-between; margin-bottom:26px;
+            border-bottom:1px solid var(--rule); padding-bottom:16px;
+        }
+        .id{ display:flex; gap:16px; align-items:flex-start; }
+        .avatar{ width:88px; height:88px; border-radius:12px; object-fit:cover; border:1px solid var(--rule); background:#f7f7f9; }
+        .name-block{ display:flex; flex-direction:column; }
+        .layout{ display:grid; grid-template-columns: 260px 1fr; gap:22px; align-items:start; }
+        aside.sidebar{ display:flex; flex-direction:column; gap:16px; }
+        .card{ background:var(--bg); border:1px solid var(--rule); border-radius:12px; padding:12px 14px; }
+        .section-title{ font-size:9.5pt; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin:0 0 10px; font-weight:700; }
+        .name{ font-size:24pt; font-weight:700; color:var(--h); line-height:1.05; }
+        .role{ font-size:12.5pt; color:var(--muted); margin-top:4px; font-weight:500; }
+        .contact{ font-size:10.5pt; color:var(--fg); }
+        .contact a{ color:inherit; text-decoration:none; border-bottom:1px dotted var(--rule); }
+        .chips{ display:flex; flex-wrap:wrap; gap:8px 10px; }
+        .chip{ background:var(--chip-bg); color:#0b2b6a; border:1px solid #dbe7ff; padding:5px 10px; border-radius:999px; font-size:9.5pt; }
+        h2{
+            font-size:10.5pt; letter-spacing:.08em; text-transform:uppercase; color:var(--muted);
+            margin:22px 0 12px; font-weight:700;
+        }
+        section{ margin-bottom:16px; }
+        .summary{ color:#2a2f36; }
+        .row{ display:grid; grid-template-columns: 1.05fr 2fr; gap:22px; align-items:start; }
+        .item{ padding:12px 14px; border:1px solid var(--rule); border-radius:12px; margin-bottom:10px; }
+        .item:last-child{ border-bottom:none; }
+        .item h3{ margin:0 0 2px; font-size:12pt; color:var(--h); font-weight:600; }
+        .meta{ font-size:10pt; color:var(--muted); }
+        .desc{ margin-top:6px; }
+        ul.tight{ margin:6px 0 0 18px; padding:0; }
+        .tech{ margin-top:6px; }
+        .tech .chip{ font-size:9pt; }
+        .links a{ font-size:10pt; margin-right:12px; text-decoration:none; color:var(--accent); }
+        .col-title{ font-weight:600; color:var(--muted); margin-bottom:6px; }
+        .two-col{ display:grid; grid-template-columns: 1.2fr 1fr; gap:22px; }
+        .lang-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:8px 14px; }
+        .muted{ color:var(--muted); }
+        .bulletless{ list-style:none; padding:0; margin:6px 0 0; }
+        /* page-break control to avoid orphan headings/items */
+        h2{ page-break-after: avoid; }
+        header, .item{ page-break-inside: avoid; break-inside: avoid; }
+        a{ color:inherit; }
+        @media print { .page-break{ break-after: page; } }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- HEADER -->
+    <header>
+        <div class="id">
+            <img class="avatar" th:if="${cv.photoUrl}" th:src="${cv.photoUrl}" alt="Profile"/>
+            <div class="name-block">
+                <div class="name" th:text="${resume.fullName}">John Doe</div>
+                <div class="role" th:text="${resume.role}">Senior Software Developer</div>
+            </div>
+        </div>
+        <div class="contact" style="text-align:right;">
+            <div th:text="${resume.location}">Prague, Czechia</div>
+            <div>
+                <a th:href="'mailto:' + ${resume.email}" th:text="${resume.email}">john.doe@email.com</a>
+            </div>
+            <div th:if="${resume.phone}" th:text="${resume.phone}">+420 777 000 000</div>
+            <div class="links" style="margin-top:4px;">
+                <a th:if="${socials != null and socials['linkedin'] != null}" th:href="${socials['linkedin']}">LinkedIn</a>
+                <a th:if="${socials != null and socials['github'] != null}" th:href="${socials['github']}">GitHub</a>
+                <a th:if="${socials != null and socials['website'] != null}" th:href="${socials['website']}" rel="noopener">Website</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- SUMMARY -->
+    <section>
+        <h2>Professional Summary</h2>
+        <p class="summary" th:text="${resume.summary}">
+            Kotlin/Java backend engineer specializing in Spring WebFlux, R2DBC, and cloud-ready services.
+            Passionate about performance, clean architecture, and developer experience.
+        </p>
+    </section>
+
+    <!-- LAYOUT: Sidebar + Main -->
+    <div class="layout">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="card contact">
+                <div class="section-title">Contact</div>
+                <div th:text="${resume.location}">Prague, Czechia</div>
+                <div>
+                    <a th:href="'mailto:' + ${resume.email}" th:text="${resume.email}">john.doe@email.com</a>
+                </div>
+                <div th:if="${resume.phone}" th:text="${resume.phone}" style="margin-top:2px;">+420 777 000 000</div>
+                <div class="links" style="margin-top:6px;">
+                    <a th:if="${socials != null and socials['linkedin'] != null}" th:href="${socials['linkedin']}">LinkedIn</a>
+                    <a th:if="${socials != null and socials['github'] != null}" th:href="${socials['github']}">GitHub</a>
+                    <a th:if="${socials != null and socials['website'] != null}" th:href="${socials['website']}" rel="noopener">Website</a>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="section-title">Skills</div>
+                <div class="col-title">Languages &amp; Runtime</div>
+                <div class="chips">
+                    <span class="chip" th:each="s : ${skills.languages}" th:text="${s}">Kotlin</span>
+                </div>
+                <div style="height:8px"></div>
+                <div class="col-title">Frameworks</div>
+                <div class="chips">
+                    <span class="chip" th:each="s : ${skills.frameworks}" th:text="${s}">Spring WebFlux</span>
+                </div>
+                <div style="height:8px"></div>
+                <div class="col-title">Datastores</div>
+                <div class="chips">
+                    <span class="chip" th:each="s : ${skills.datastores}" th:text="${s}">PostgreSQL (R2DBC)</span>
+                </div>
+                <div style="height:8px"></div>
+                <div class="col-title">Tools &amp; Ops</div>
+                <div class="chips">
+                    <span class="chip" th:each="s : ${skills.tools}" th:text="${s}">Docker</span>
+                </div>
+            </div>
+
+            <div class="card" th:if="${languages}">
+                <div class="section-title">Languages</div>
+                <div class="lang-grid">
+                    <div th:each="l : ${languages}">
+                        <div><strong th:text="${l.name}">English</strong></div>
+                        <div class="muted" th:text="${l.level}">C1</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" th:if="${hobbies}">
+                <div class="section-title">Interests</div>
+                <ul class="bulletless">
+                    <li th:each="h : ${hobbies.sports}" th:text="${h}">Running</li>
+                    <li th:each="o : ${hobbies.others}" th:text="${o}">Bonsai</li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- MAIN -->
+        <main>
+
+                <!-- PROJECTS -->
+                <section th:if="${projects}">
+                    <h2>Projects</h2>
+                    <div class="item" th:each="p : ${projects}">
+            <h3>
+                <span th:text="${p.projectName}">WriteWave</span>
+                <span class="muted" th:if="${p.company}"> · </span>
+                <span class="muted" th:text="${p.company}">Kotlin Server Squad</span>
+            </h3>
+            <div class="meta">
+                <span th:text="${#temporals.format(p.startAt, 'MMM yyyy')}">Jan 2023</span>
+                –
+                <span th:text="${p.endAt != null ? #temporals.format(p.endAt, 'MMM yyyy') : 'Present'}">Present</span>
+            </div>
+            <div class="desc" th:text="${p.description}">
+                CMS-like blogging & CV platform with PDF export and SSE notifications.
+            </div>
+            <ul class="tight" th:if="${p.responsibilities}">
+                <li th:each="r : ${p.responsibilities}" th:text="${r}">Designed modular monolith with hexagonal architecture.</li>
+            </ul>
+            <div class="tech chips" th:if="${p.techStack}">
+                <span class="chip" th:each="t : ${p.techStack}" th:text="${t}">Spring Boot</span>
+            </div>
+            <div class="links" style="margin-top:6px;">
+                <a th:if="${p.repoUrl}" th:href="${p.repoUrl}">Repository</a>
+                <a th:if="${p.demoUrl}" th:href="${p.demoUrl}">Demo</a>
+                    </div>
+                </section>
+
+                <!-- WORK EXPERIENCE -->
+                <section th:if="${experiences}">
+                    <h2>Work Experience</h2>
+                    <div class="item" th:each="e : ${experiences}">
+            <h3>
+                <span th:text="${e.title}">Senior Backend Engineer</span>
+                <span class="muted"> · </span>
+                <span th:text="${e.company}">GoodData</span>
+            </h3>
+            <div class="meta">
+                <span th:text="${#temporals.format(e.startAt, 'MMM yyyy')}">Feb 2021</span>
+                –
+                <span th:text="${e.endAt != null ? #temporals.format(e.endAt, 'MMM yyyy') : 'Present'}">Present</span>
+                <span class="muted" th:if="${e.location}"> · <span th:text="${e.location}">Prague (Hybrid)</span></span>
+            </div>
+            <div class="desc" th:text="${e.summary}">
+                Led migration to WebFlux + R2DBC, reduced p95 latency by 35%.
+            </div>
+            <ul class="tight" th:if="${e.highlights}">
+                <li th:each="h : ${e.highlights}" th:text="${h}">Introduced outbox pattern for reliable events.</li>
+            </ul>
+            <div class="tech chips" th:if="${e.techStack}">
+                <span class="chip" th:each="t : ${e.techStack}" th:text="${t}">Kotlin</span>
+                    </div>
+                </section>
+
+                <!-- EDUCATION -->
+                <section th:if="${education}">
+                    <h2>Education</h2>
+                    <div class="item" th:each="ed : ${education}">
+                <h3>
+                    <span th:text="${ed.degree != null ? ed.degree : 'B.Sc. Computer Science'}">B.Sc. Computer Science</span>
+                    <span class="muted"> · </span>
+                    <span th:text="${ed.institution}">CTU in Prague</span>
+                </h3>
+                <div class="meta">
+                    <span th:text="${#temporals.format(ed.since, 'yyyy')}">2018</span>
+                    <span th:if="${ed.expectedUntil}">– <span th:text="${#temporals.format(ed.expectedUntil, 'yyyy')}">2022</span></span>
+                    <span class="muted" th:if="${ed.field}"> · <span th:text="${ed.field}">Software Engineering</span></span>
+                </div>
+                <div class="desc" th:if="${ed.thesisTitle}">
+                    <strong>Thesis:</strong> <span th:text="${ed.thesisTitle}">Event-Driven Microservices in Kotlin</span>
+                    <div th:if="${ed.thesisDescription}" th:text="${ed.thesisDescription}" class="muted"></div>
+                </div>
+                    </div>
+                </section>
+
+                <!-- CERTIFICATIONS -->
+                <section th:if="${certificates}">
+                    <h2>Certifications</h2>
+                    <div class="item" th:each="c : ${certificates}">
+                <h3><span th:text="${c.name}">AWS Certified Developer – Associate</span></h3>
+                <div class="meta">
+                    <span th:text="${c.issuer}">Amazon</span>
+                    <span th:if="${c.startAt}"> · <span th:text="${#temporals.format(c.startAt, 'yyyy-MM')}">2023-04</span></span>
+                    <span th:if="${c.endAt}"> – <span th:text="${#temporals.format(c.endAt, 'yyyy-MM')}">2026-04</span></span>
+                </div>
+                <div class="desc" th:if="${c.description}" th:text="${c.description}">
+                    Focus on serverless and event-driven architectures.
+                </div>
+                <div class="links">
+                    <a th:if="${c.url}" th:href="${c.url}">Certificate</a>
+                    <a th:if="${c.certificateId}" th:href="${c.url}" th:text="'ID: ' + ${c.certificateId}">ID: ABC-123</a>
+                </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+</div>
+</body>
+</html>

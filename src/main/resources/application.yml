@@ -1,0 +1,42 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: be
+  r2dbc:
+    url: ${R2DBC_URL:r2dbc:postgresql://localhost:5432/personal}
+    username: ${DB_USER:personal}
+    password: ${DB_PASSWORD:personal}
+  flyway:
+    enabled: true
+    url: ${FLYWAY_URL:jdbc:postgresql://localhost:5432/personal}
+    user: ${FLYWAY_USER:personal}
+    password: ${FLYWAY_PASSWORD:personal}
+  jackson:
+    serialization:
+      WRITE_DATES_AS_TIMESTAMPS: false
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://keycloak.kotlinserversquad.com/realms/personalblog
+          jwk-set-uri: https://keycloak.kotlinserversquad.com/realms/personalblog/protocol/openid-connect/certs
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+security:
+  allowed-origins: ${ALLOWED_ORIGINS:http://localhost:3333,http://localhost:3335}
+

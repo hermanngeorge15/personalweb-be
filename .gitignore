@@ -1,0 +1,17 @@
+.gradle/
+build/
+out/
+bin/
+*.iml
+.idea/
+.DS_Store
+**/.classpath
+**/.project
+**/.settings/
+**/.vscode/
+local.properties
+*.log
+!.mvn/wrapper/maven-wrapper.jar
+gradle/wrapper/gradle-wrapper.jar
+
+

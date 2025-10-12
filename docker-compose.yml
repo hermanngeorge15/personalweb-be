@@ -1,0 +1,47 @@
+name: personal-blog
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: personal
+      POSTGRES_USER: personal
+      POSTGRES_PASSWORD: personal
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U personal -d personal"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  be:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # R2DBC / JDBC for app and flyway
+      R2DBC_URL: r2dbc:postgresql://db:5432/personal
+      DB_USER: personal
+      DB_PASSWORD: personal
+      FLYWAY_URL: jdbc:postgresql://db:5432/personal
+      FLYWAY_USER: personal
+      FLYWAY_PASSWORD: personal
+      # Security / CORS
+      ALLOWED_ORIGINS: http://localhost:3333
+      JWT_ISSUER_URI: http://localhost:8081/realms/personal
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/actuator/health | grep -q UP"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  db_data:
+
+

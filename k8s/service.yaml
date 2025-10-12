@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: be
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8080"
+    prometheus.io/path: "/actuator/prometheus"
+spec:
+  selector:
+    app: be
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+

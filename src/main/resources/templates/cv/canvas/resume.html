@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+  <head>
+    <meta charset="UTF-8"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title th:text="${resume.fullName} + ' – Resume'">Resume</title>
+    <style>
+@page {
+  size: A4 portrait;
+  margin: 0;
+}
+
+@page:first {
+  margin-top: 0;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+@font-face {
+  font-family: 'Roboto';
+  src: url('../fonts/Roboto-Regular.ttf');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Roboto';
+  src: url('../fonts/Roboto-Bold.ttf');
+  font-weight: bold;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Roboto';
+  src: url('../fonts/Roboto-Italic.ttf');
+  font-weight: normal;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'Roboto';
+  src: url('../fonts/Roboto-Medium.ttf');
+  font-weight: 600;
+  font-style: normal;
+}
+
+body {
+  font-family: 'Roboto', Arial, sans-serif;
+  font-size: 8.5pt;
+  line-height: 1.4;
+  color: #2c3e50;
+  background: #fff;
+  overflow: hidden;
+}
+
+.container {
+  display: table;
+  width: 100%;
+  height: auto;
+  page-break-after: avoid;
+}
+
+#main {
+  float: left;
+  width: 65%;
+  padding: 15px 20px;
+  background: #fff;
+  page-break-after: avoid;
+}
+
+#sidebar {
+  float: right;
+  width: 35%;
+  padding: 15px 15px;
+  background: #34495e;
+  color: #ecf0f1;
+  height: 100%;
+  page-break-inside: avoid;
+}
+
+/* Header styling */
+#title {
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #3498db;
+  display: table;
+  width: 100%;
+}
+
+.title-content {
+  display: table-cell;
+  vertical-align: middle;
+}
+
+.profile-photo {
+  display: table-cell;
+  vertical-align: middle;
+  width: 90px;
+  padding-right: 15px;
+}
+
+.profile-photo img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 3px solid #3498db;
+  object-fit: cover;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  background: #fff;
+}
+
+#title h1 {
+  font-size: 20pt;
+  font-weight: 700;
+  color: #2c3e50;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 2px;
+}
+
+.subtitle {
+  font-size: 9.5pt;
+  color: #7f8c8d;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+/* Personal Summary Section */
+.summary-block {
+  margin: 8px 0 10px 0;
+  padding: 8px 10px;
+  background: #f8f9fa;
+  border-left: 3px solid #3498db;
+  border-radius: 3px;
+}
+
+.summary-text {
+  font-size: 8pt;
+  line-height: 1.4;
+  color: #555;
+  margin: 0;
+  text-align: justify;
+}
+
+/* Main content sections */
+.main-block {
+  margin-bottom: 12px;
+  page-break-inside: avoid;
+}
+
+/* Skills as inline list */
+.skills-section {
+  margin-bottom: 12px;
+}
+
+.skills-list {
+  display: block;
+  margin: 0;
+  padding: 0;
+}
+
+.skill-item {
+  display: inline-block;
+  background: #e8f4f8;
+  color: #2c3e50;
+  padding: 3px 8px;
+  margin: 2px 4px 2px 0;
+  border-radius: 2px;
+  font-size: 7.5pt;
+  border: 1px solid #3498db;
+}
+
+#main h2 {
+  font-size: 11pt;
+  font-weight: 700;
+  color: #2c3e50;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 8px;
+  margin-top: 2px;
+  padding-bottom: 4px;
+  padding-top: 0px;
+  border-bottom: 2px solid #3498db;
+  page-break-after: avoid;
+}
+
+.blocks {
+  margin-bottom: 8px;
+  padding: 8px 10px;
+  background: #f9fafb;
+  border-left: 3px solid #3498db;
+  border-radius: 2px;
+  page-break-inside: avoid;
+}
+
+.blocks:last-child {
+  page-break-after: auto;
+}
+
+.date {
+  font-size: 7pt;
+  color: #fff;
+  background: #3498db;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 2px;
+  display: inline-block;
+  margin-bottom: 4px;
+}
+
+.details h3 {
+  font-size: 9.5pt;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 2px;
+  line-height: 1.3;
+}
+
+.details .place {
+  font-size: 8pt;
+  color: #3498db;
+  font-weight: 600;
+  margin-bottom: 3px;
+  display: block;
+}
+
+.details .location {
+  font-size: 7pt;
+  color: #95a5a6;
+}
+
+.details > div {
+  margin-top: 4px;
+  font-size: 7.5pt;
+  line-height: 1.45;
+  color: #555;
+}
+
+.tech-stack {
+  margin-top: 6px;
+  padding: 4px 8px;
+  background: #f0f7ff;
+  border-left: 2px solid #3498db;
+  border-radius: 2px;
+  font-size: 7pt;
+  color: #2c3e50;
+}
+
+.tech-stack strong {
+  color: #3498db;
+  font-weight: 600;
+  margin-right: 4px;
+}
+
+#main ul {
+  margin: 5px 0 0 15px;
+  padding: 0;
+}
+
+#main li {
+  margin: 2px 0;
+  font-size: 7.5pt;
+  line-height: 1.4;
+  color: #555;
+  list-style-type: disc;
+  padding-left: 3px;
+}
+
+/* Sidebar styling */
+#sidebar h1 {
+  font-size: 10pt;
+  font-weight: 700;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 8px;
+  padding-bottom: 5px;
+  border-bottom: 2px solid #3498db;
+}
+
+.side-block {
+  margin-bottom: 15px;
+}
+
+.side-block:first-child {
+  margin-top: 0;
+}
+
+#contact ul,
+#skills ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+#contact li {
+  font-size: 7.5pt;
+  line-height: 1.5;
+  color: #ecf0f1;
+  margin: 6px 0;
+  display: block;
+}
+
+#contact li strong {
+  color: #3498db;
+  font-weight: 700;
+  display: block;
+  font-size: 7pt;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: 1px;
+}
+
+#contact li span {
+  display: block;
+  color: #ecf0f1;
+  font-size: 7.5pt;
+}
+
+/* Specialization, Links, Interests styling */
+#specialization ul,
+#links ul,
+#interests ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+#specialization li,
+#interests li {
+  font-size: 7.5pt;
+  line-height: 1.5;
+  color: #ecf0f1;
+  margin: 4px 0;
+  padding-left: 10px;
+  position: relative;
+}
+
+#specialization li:before,
+#interests li:before {
+  content: "▸";
+  position: absolute;
+  left: 0;
+  color: #3498db;
+  font-weight: bold;
+  font-size: 7pt;
+}
+
+#links li {
+  font-size: 7.5pt;
+  line-height: 1.5;
+  color: #ecf0f1;
+  margin: 6px 0;
+  display: block;
+}
+
+#links li strong {
+  color: #3498db;
+  font-weight: 600;
+  display: block;
+  font-size: 7pt;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: 1px;
+}
+
+#links li span {
+  display: block;
+  color: #ecf0f1;
+  font-size: 7.5pt;
+}
+
+#languages li {
+  background: rgba(52, 152, 219, 0.15);
+  padding: 4px 8px;
+  margin: 4px 0;
+  border-radius: 2px;
+  font-size: 7.5pt;
+}
+
+#languages li strong {
+  color: #3498db;
+  font-size: 8pt;
+}
+
+/* Education styling - same as projects */
+.main-block.concise {
+  margin-bottom: 10px;
+}
+
+.main-block.concise .blocks {
+  /* Keep same card design as projects */
+  margin-bottom: 8px;
+  padding: 8px 10px;
+  background: #f9fafb;
+  border-left: 3px solid #3498db;
+  border-radius: 2px;
+}
+
+.main-block.concise .date {
+  /* Keep same blue badge as projects */
+  font-size: 7pt;
+  color: #fff;
+  background: #3498db;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 2px;
+  display: inline-block;
+  margin-bottom: 4px;
+}
+
+.main-block.concise .details h3 {
+  font-size: 8.5pt;
+  margin-bottom: 1px;
+}
+
+.main-block.concise .details .place {
+  font-size: 8pt;
+  margin-bottom: 2px;
+}
+
+.main-block.concise .details > div {
+  font-size: 7.5pt;
+  margin-top: 2px;
+  line-height: 1.3;
+}
+
+/* Certifications - simple text-only design */
+#certifications .blocks {
+  margin-bottom: 6px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+}
+
+#certifications .date {
+  font-size: 7pt;
+  color: #7f8c8d;
+  background: transparent;
+  font-weight: 600;
+  padding: 0;
+  display: inline;
+  margin-bottom: 2px;
+}
+
+#certifications .details h3 {
+  font-size: 8.5pt;
+  margin-bottom: 1px;
+}
+
+#certifications .details .place {
+  font-size: 7.5pt;
+  color: #7f8c8d;
+  margin-bottom: 2px;
+}
+    </style>
+  </head>
+  <body lang="en">
+    <div class="container">
+    <section id="main">
+      <header id="title">
+          <div class="title-content">
+            <h1 th:text="${resume.fullName}">John Doe</h1>
+            <span class="subtitle" th:text="${resume.role}">Plaintiff, defendant &amp; witness</span>
+          </div>
+            </header>
+      
+      <!-- Personal Summary -->
+      <section class="summary-block" th:if="${resume.summary != null and resume.summary != ''}">
+        <p class="summary-text" th:text="${resume.summary}">
+          Experienced backend engineer with expertise in Kotlin, Spring Boot, and modern microservices architecture.
+        </p>
+      </section>
+      
+      <section class="main-block" th:if="${projects != null and !projects.isEmpty()}">
+        <h2>Projects</h2>
+        <section class="blocks" th:each="p : ${projects}">
+          <div class="date">
+            <span th:text="${#temporals.format(p.startAt, 'MM/yyyy')}">01/2015</span>
+            <span>-</span>
+            <span th:text="${p.endAt != null ? #temporals.format(p.endAt, 'MM/yyyy') : 'present'}">12/2016</span>
+          </div>
+          <div class="decorator">
+          </div>
+          <div class="details">
+            <header>
+              <h3 th:text="${p.projectName}">Some Project 1</h3>
+              <span class="place" th:if="${p.company}" th:text="${p.company}">Some workplace</span>
+            </header>
+            <div th:if="${p.description}" th:text="${p.description}"></div>
+            <div th:if="${p.techStack != null and !p.techStack.isEmpty()}" class="tech-stack">
+              <strong>Tech Stack:</strong>
+              <span th:text="${#strings.listJoin(p.techStack, ', ')}">Kotlin, Spring Boot, PostgreSQL</span>
+            </div>
+            <div th:if="${p.responsibilities}">
+              <ul>
+                <li th:each="r : ${p.responsibilities}" th:text="${r}">Responsibility</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+      </section>
+      
+      <!-- Skills Section -->
+      <section class="main-block skills-section" th:if="${skills != null}">
+        <h2>Skills</h2>
+        <div class="skills-list">
+          <span class="skill-item" th:each="s : ${skills.languages}" th:text="${s}">Kotlin</span>
+          <span class="skill-item" th:each="s : ${skills.frameworks}" th:text="${s}">Spring Boot</span>
+          <span class="skill-item" th:each="s : ${skills.datastores}" th:text="${s}">PostgreSQL</span>
+          <span class="skill-item" th:each="s : ${skills.tools}" th:text="${s}">Docker</span>
+          </div>
+        </section>
+      
+      <section class="main-block concise" th:if="${education != null and !education.isEmpty()}">
+        <h2>Education</h2>
+        <section class="blocks" th:each="ed : ${education}">
+          <div class="date">
+            <span th:text="${#temporals.format(ed.since, 'yyyy')}">2009</span>
+            <span th:if="${ed.expectedUntil}" th:text="${#temporals.format(ed.expectedUntil, 'yyyy')}">2014</span>
+          </div>
+          <div class="decorator">
+          </div>
+          <div class="details">
+            <header>
+              <h3 th:text="${ed.degree != null ? ed.degree : 'B.Sc. Computer Science'}">Ph.D. in Forty-Two Discovery</h3>
+              <span class="place" th:text="${ed.institution}">Inexistent University</span>
+              <span class="location" th:if="${ed.field}" th:text="${ed.field}">Some City, Some Country</span>
+            </header>
+            <div th:if="${ed.thesisTitle}" th:text="${ed.thesisTitle}">Relationship of the number with the answer to life, the universe and everything</div>
+            <div th:if="${ed.thesisDescription}" th:text="${ed.thesisDescription}"></div>
+          </div>
+        </section>
+        </section>
+      <section class="main-block concise" id="certifications" th:if="${certificates != null and !certificates.isEmpty()}">
+        <h2>Certifications</h2>
+        <section class="blocks" th:each="c : ${certificates}">
+          <div class="date">
+            <span th:if="${c.startAt}" th:text="${#temporals.format(c.startAt, 'yyyy')}">2020</span>
+            <span th:if="${c.endAt}" th:text="${#temporals.format(c.endAt, 'yyyy')}">2025</span>
+          </div>
+          <div class="decorator">
+          </div>
+          <div class="details">
+            <header>
+              <h3 th:text="${c.name}">Certification Name</h3>
+              <span class="place" th:if="${c.issuer}" th:text="${c.issuer}">Issuer</span>
+            </header>
+            <div th:if="${c.description}" th:text="${c.description}"></div>
+          </div>
+        </section>
+      </section>
+    </section>
+    <aside id="sidebar">
+      <div class="side-block" id="contact">
+        <h1>Contact</h1>
+        <ul>
+          <li th:if="${resume.email != null}">
+            <strong>Email</strong>
+            <span th:text="${resume.email}">me@johndoe.gtld</span>
+          </li>
+          <li th:if="${resume.phone != null}">
+            <strong>Phone</strong>
+            <span th:text="${resume.phone}">800.000.0000</span>
+          </li>
+          <li th:if="${resume.location != null}">
+            <strong>Location</strong>
+            <span th:text="${resume.location}">City, Country</span>
+          </li>
+          <li th:if="${socials != null and socials['website'] != null}">
+            <strong>Website</strong>
+            <span th:text="${#strings.replace(#strings.replace(socials['website'], 'https://', ''), 'http://', '')}">johndoe.com</span>
+          </li>
+          <li th:if="${socials != null and socials['linkedin'] != null}">
+            <strong>LinkedIn</strong>
+            <span th:text="${#strings.replace(#strings.replace(socials['linkedin'], 'https://', ''), 'http://', '')}">linkedin.com/in/john</span>
+          </li>
+          <li th:if="${socials != null and socials['github'] != null}">
+            <strong>GitHub</strong>
+            <span th:text="${#strings.replace(#strings.replace(socials['github'], 'https://', ''), 'http://', '')}">github.com/john</span>
+          </li>
+          <li th:if="${socials != null and socials['instagram'] != null}">
+            <strong>Instagram</strong>
+            <span th:text="${#strings.replace(#strings.replace(socials['instagram'], 'https://', ''), 'http://', '')}">instagram.com/john</span>
+          </li>
+        </ul>
+      </div>
+      
+<!--      &lt;!&ndash; SPECIALIZATION SECTION - REPLACE CONTENT BELOW &ndash;&gt;-->
+<!--      <div class="side-block" id="specialization">-->
+<!--        <h1>Specialization</h1>-->
+<!--        <ul>-->
+<!--          <li>Backend Development</li>-->
+<!--          <li>Microservices Architecture</li>-->
+<!--          <li>Reactive Programming</li>-->
+<!--          <li>Cloud-Native Applications</li>-->
+<!--          <li>API Design &amp; Development</li>-->
+<!--        </ul>-->
+<!--      </div>-->
+      <!-- END SPECIALIZATION - Replace list items above with your own -->
+      
+      <!-- LINKS SECTION -->
+      <div class="side-block" id="links" th:if="${cv != null and cv.links != null and !cv.links.isEmpty()}">
+        <h1>Links</h1>
+        <ul>
+          <li th:each="link : ${cv.links}">
+            <strong th:text="${link.label}">Portfolio</strong>
+            <span th:text="${#strings.replace(#strings.replace(link.url, 'https://', ''), 'http://', '')}">yourportfolio.com</span>
+          </li>
+        </ul>
+      </div>
+      <!-- END LINKS -->
+      
+      <!-- INTERESTS SECTION - REPLACE CONTENT BELOW -->
+      <div class="side-block" id="interests">
+        <h1>Interests</h1>
+        <ul>
+          <li>Community building</li>
+          <li>Tech Blogging</li>
+          <li>AI</li>
+          <li>Sports</li>
+          <li>Japan</li>
+          <li>Traveling &amp; Nature</li>
+        </ul>
+      </div>
+      <!-- END INTERESTS - Replace list items above with your own -->
+      
+      <div class="side-block" id="languages" th:if="${languages}">
+        <h1>
+          Languages
+        </h1>
+        <ul>
+          <li th:each="l : ${languages}">
+            <span th:text="${l.name}">English</span>
+            <span th:if="${l.level}" th:text="' (' + ${l.level} + ')'"> (C1)</span>
+          </li>
+        </ul>
+      </div>
+    </aside>
+    </div>
+  </body>
+</html>

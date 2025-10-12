@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8" />
+  <title th:text="${resume.fullName} + ' – Resume'">First Last – Resume</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --text:#111;
+      --muted:#555;
+      --accent:#0e7490;
+      --link:#0ea5e9;
+      --section-gap:18px;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin:0; padding:0; color:var(--text); font: 14px/1.45 "Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+    a { color:var(--link); text-decoration:none; }
+    a:hover { text-decoration:underline; }
+    .page {
+      max-width: 800px;
+      margin: 24px auto;
+      padding: 28px;
+      background:#fff;
+    }
+    header {
+      display:flex;
+      gap:16px;
+      align-items:flex-start;
+      border-bottom:1px solid #e5e7eb;
+      padding-bottom:12px;
+      margin-bottom:16px;
+    }
+    .id {
+      flex:1;
+    }
+    h1 {
+      font-size: 26px; margin:0 0 4px 0; letter-spacing:0.2px;
+    }
+    .subtitle { color:var(--muted); margin:0 0 8px 0; }
+    .contacts { display:flex; flex-wrap:wrap; gap:10px 16px; color:var(--muted); }
+    .tag { color:var(--muted); }
+    section { margin-top: var(--section-gap); }
+    h2 {
+      font-size: 14px; letter-spacing:0.8px; text-transform:uppercase; color:var(--accent);
+      margin:0 0 8px 0; font-weight:700;
+    }
+    .two-col {
+      display:grid; grid-template-columns: 1.1fr 1fr; gap: 20px;
+    }
+    .item { margin-bottom:12px; }
+    .role { display:flex; justify-content:space-between; gap:12px; }
+    .role h3 { font-size: 15px; margin:0; }
+    .org { color:var(--muted); }
+    .when { white-space:nowrap; color:var(--muted); }
+    ul { margin:6px 0 0 0; padding-left:18px; }
+    li { margin:3px 0; }
+    .skills { display:flex; flex-wrap:wrap; gap:6px 10px; }
+    .chip { padding:3px 8px; border:1px solid #e5e7eb; border-radius:6px; font-size:12px; color:#374151; }
+    @media (max-width: 820px) { .page{ margin:0; border-radius:0; } }
+    @media (max-width: 720px) { .two-col{ grid-template-columns: 1fr; } }
+    @page { margin: 18mm; }
+    @media print {
+      body { background:#fff; }
+      .page { box-shadow:none; margin:0; padding:0; }
+      a { color:inherit; text-decoration:none; }
+      .chip { border-color:#d1d5db; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header>
+      <div class="id">
+        <h1 th:text="${resume.fullName}">First Last</h1>
+        <p class="subtitle" th:text="${resume.role}">Senior Backend Engineer • Kotlin, Spring WebFlux, Microservices</p>
+        <div class="contacts">
+          <span th:if="${resume.location != null}" th:text="${resume.location}">Praha, Česko</span>
+          <span th:if="${resume.location != null and (resume.email != null or (socials != null and (socials['github'] != null or socials['linkedin'] != null or socials['website'] != null)))}">•</span>
+          <a th:if="${resume.email}" th:href="'mailto:' + ${resume.email}" th:text="${resume.email}">email@example.com</a>
+          <span th:if="${resume.email != null and (socials != null and (socials['github'] != null or socials['linkedin'] != null or socials['website'] != null))}">•</span>
+          <a th:if="${socials != null and socials['github'] != null}" th:href="${socials['github']}" th:text="${#strings.replace(#strings.replace(socials['github'], 'https://', ''), 'http://', '')}">github.com/username</a>
+          <span th:if="${socials != null and socials['linkedin'] != null}">•</span>
+          <a th:if="${socials != null and socials['linkedin'] != null}" th:href="${socials['linkedin']}" th:text="${#strings.replace(#strings.replace(socials['linkedin'], 'https://', ''), 'http://', '')}">linkedin.com/in/username</a>
+          <span th:if="${socials != null and socials['website'] != null}">•</span>
+          <a th:if="${socials != null and socials['website'] != null}" th:href="${socials['website']}" th:text="${#strings.replace(#strings.replace(socials['website'], 'https://', ''), 'http://', '')}">website</a>
+        </div>
+      </div>
+    </header>
+
+    <section>
+      <h2>Summary</h2>
+      <p th:text="${resume.summary}">Backend engineer with 8+ years building high-throughput microservices using Kotlin, Spring Boot WebFlux, and Postgres; focuses on performance, security, and observability with Micrometer/Prometheus/Grafana.</p>
+    </section>
+
+    <section class="two-col">
+      <div>
+        <h2>Experience</h2>
+        <div class="item" th:if="${experiences}" th:each="e : ${experiences}">
+          <div class="role">
+            <h3>
+              <span th:text="${e.title}">Senior Backend Engineer</span>
+              <span class="org"> • </span>
+              <span class="org" th:text="${e.company}">ACME</span>
+            </h3>
+            <div class="when">
+              <span th:text="${#temporals.format(e.startAt, 'yyyy')}">2019</span>–
+              <span th:text="${e.endAt != null ? #temporals.format(e.endAt, 'yyyy') : 'Present'}">Present</span>
+            </div>
+          </div>
+          <ul th:if="${e.highlights}">
+            <li th:each="h : ${e.highlights}" th:text="${h}">Designed multi-tenant services…</li>
+          </ul>
+        </div>
+
+        <h2>Education</h2>
+        <div class="item" th:if="${education}" th:each="ed : ${education}">
+          <div class="role">
+            <h3>
+              <span th:text="${ed.degree != null ? ed.degree : 'B.Sc. Computer Science'}">BSc Computer Science</span>
+              <span class="org"> • </span>
+              <span class="org" th:text="${ed.institution}">CTU</span>
+            </h3>
+            <div class="when">
+              <span th:text="${#temporals.format(ed.since, 'yyyy')}">2015</span>
+              <span th:if="${ed.expectedUntil}">– <span th:text="${#temporals.format(ed.expectedUntil, 'yyyy')}">2018</span></span>
+            </div>
+          </div>
+          <ul>
+            <li th:if="${ed.field}" th:text="${'Focus: ' + ed.field}">Focus: distributed systems, security, databases.</li>
+            <li th:if="${ed.thesisTitle}"><strong>Thesis:</strong> <span th:text="${ed.thesisTitle}">Event-Driven Microservices</span></li>
+            <li th:if="${ed.thesisDescription}" th:text="${ed.thesisDescription}">Description…</li>
+          </ul>
+        </div>
+      </div>
+
+      <div>
+        <h2>Skills</h2>
+        <div class="skills">
+          <span class="chip" th:each="s : ${skills.languages}" th:text="${s}">Kotlin</span>
+          <span class="chip" th:each="s : ${skills.frameworks}" th:text="${s}">Spring Boot</span>
+          <span class="chip" th:each="s : ${skills.datastores}" th:text="${s}">PostgreSQL</span>
+          <span class="chip" th:each="s : ${skills.tools}" th:text="${s}">Docker</span>
+        </div>
+
+        <h2>Projects</h2>
+        <div class="item" th:if="${projects}" th:each="p : ${projects}">
+          <div class="role">
+            <h3>
+              <span th:text="${p.projectName}">Realtime BFF Gateway</span>
+              <span class="org" th:if="${p.company}"> • <span th:text="${p.company}">Open Source</span></span>
+            </h3>
+            <div class="when">
+              <span th:text="${#temporals.format(p.startAt, 'yyyy')}">2024</span>
+              <span>–</span>
+              <span th:text="${p.endAt != null ? #temporals.format(p.endAt, 'yyyy') : 'Present'}">Present</span>
+            </div>
+          </div>
+          <div th:if="${p.description}" th:text="${p.description}"></div>
+          <ul class="tight" th:if="${p.responsibilities}">
+            <li th:each="r : ${p.responsibilities}" th:text="${r}">Responsibility…</li>
+          </ul>
+          <div class="skills" th:if="${p.techStack}">
+            <span class="chip" th:each="t : ${p.techStack}" th:text="${t}">WebFlux</span>
+          </div>
+          <div class="contacts" style="margin-top:6px;">
+            <a th:if="${p.repoUrl}" th:href="${p.repoUrl}">Repository</a>
+            <span th:if="${p.repoUrl != null and p.demoUrl != null}">•</span>
+            <a th:if="${p.demoUrl}" th:href="${p.demoUrl}">Demo</a>
+          </div>
+        </div>
+
+        <h2>Certifications</h2>
+        <ul th:if="${certificates}">
+          <li th:each="c : ${certificates}">
+            <span th:text="${c.name}">CKA (Kubernetes Administrator)</span>
+            <span th:if="${c.issuer}"> – <span th:text="${c.issuer}">CNCF</span></span>
+            <span th:if="${c.startAt}"> – <span th:text="${#temporals.format(c.startAt, 'yyyy')}">2023</span></span>
+          </li>
+        </ul>
+
+        <h2>Languages</h2>
+        <ul th:if="${languages}">
+          <li th:each="l : ${languages}">
+            <span th:text="${l.name}">English</span>
+            <span th:if="${l.level}"> (<span th:text="${l.level}">C1</span>)</span>
+          </li>
+        </ul>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
