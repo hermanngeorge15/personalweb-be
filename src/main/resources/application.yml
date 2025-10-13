@@ -28,15 +28,20 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,prometheus
+        include: health,info,prometheus,metrics
+      base-path: /actuator
+  endpoint:
+    prometheus:
+      enabled: true
+    health:
+      show-details: when-authorized
   metrics:
     export:
       prometheus:
         enabled: true
-  endpoint:
-    health:
-      probes:
-        enabled: true
+    tags:
+      application: ${spring.application.name}
+      environment: ${ENVIRONMENT:dev}
 
 security:
   allowed-origins: ${ALLOWED_ORIGINS:http://localhost:3333,http://localhost:3335}

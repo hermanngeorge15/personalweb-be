@@ -74,7 +74,7 @@ class SecurityConfig {
         ).permitAll()
         
         // Prometheus metrics - public for now, consider protecting in production
-        exchanges.pathMatchers("/actuator/prometheus", "/actuator/metrics/**").permitAll()
+        exchanges.pathMatchers("/actuator/prometheus", "/actuator/metrics/**").permitAll().anyExchange().authenticated()
         
         // OpenAPI/Swagger - public for now, consider protecting in production
         exchanges.pathMatchers(
