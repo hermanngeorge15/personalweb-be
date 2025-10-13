@@ -85,24 +85,24 @@ open class SecurityConfig {
           "/webjars/**"
         ).permitAll()
         
-        // Admin-only endpoints
-        exchanges.pathMatchers(HttpMethod.GET, "/api/contact").hasRole("ADMIN")
-        exchanges.pathMatchers(HttpMethod.POST, "/api/contact/*/handle").hasRole("ADMIN")
+        // CV generation endpoints (must be before /api/**)
+        exchanges.pathMatchers("/cv/**").permitAll()
         
-        // Public GET endpoints
+        // Public GET endpoints (must be before /api/**)
         exchanges.pathMatchers(HttpMethod.GET, "/api/posts", "/api/posts/**").permitAll()
         exchanges.pathMatchers(HttpMethod.GET, "/api/projects", "/api/projects/**").permitAll()
         exchanges.pathMatchers(HttpMethod.GET, "/api/testimonials", "/api/testimonials/**").permitAll()
         exchanges.pathMatchers(HttpMethod.GET, "/api/resume", "/api/resume/**").permitAll()
         exchanges.pathMatchers(HttpMethod.GET, "/api/meta").permitAll()
         
-        // Public POST endpoints
+        // Public POST endpoints (must be before /api/**)
         exchanges.pathMatchers(HttpMethod.POST, "/api/contact").permitAll()
         
-        // CV generation endpoints
-        exchanges.pathMatchers("/api/cv/**").permitAll()
+        // Admin-only contact endpoints
+        exchanges.pathMatchers(HttpMethod.GET, "/api/contact").hasRole("ADMIN")
+        exchanges.pathMatchers(HttpMethod.POST, "/api/contact/*/handle").hasRole("ADMIN")
         
-        // All other /api/** endpoints require ADMIN role
+        // All other /api/** endpoints require ADMIN role (POST, PUT, PATCH, DELETE)
         exchanges.pathMatchers("/api/**").hasRole("ADMIN")
         
         // Deny everything else by default (security-first approach)
