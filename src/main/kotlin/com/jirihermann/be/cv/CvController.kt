@@ -18,7 +18,7 @@ class CvController(
   private val renderer: PdfRenderer
 ) {
 
-  @GetMapping("/cv/{slug}.{lang}.pdf")
+  @GetMapping("/api/cv/{slug}.{lang}.pdf")
   suspend fun getCv(@PathVariable slug: String, @PathVariable lang: String): ResponseEntity<ByteArray> {
     val labels = CvLabels.forLang(lang)
     val cv = assembler.assemble(slug, lang)
