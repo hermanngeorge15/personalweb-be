@@ -25,7 +25,7 @@ import reactor.core.publisher.Mono
 
 @Configuration
 @EnableWebFluxSecurity
-open class SecurityConfig {
+class SecurityConfig {
 
   @Value("\${security.allowed-origins:http://localhost:3000,http://localhost:3333}")
   private lateinit var allowedOrigins: String
@@ -85,15 +85,15 @@ open class SecurityConfig {
           "/webjars/**"
         ).permitAll()
         
-        // CV generation endpoints (must be before /api/**)
-        exchanges.pathMatchers("/cv/**").permitAll()
-        
         // Public GET endpoints (must be before /api/**)
-        exchanges.pathMatchers(HttpMethod.GET, "/api/posts", "/api/posts/**").permitAll()
-        exchanges.pathMatchers(HttpMethod.GET, "/api/projects", "/api/projects/**").permitAll()
-        exchanges.pathMatchers(HttpMethod.GET, "/api/testimonials", "/api/testimonials/**").permitAll()
-        exchanges.pathMatchers(HttpMethod.GET, "/api/resume", "/api/resume/**").permitAll()
+        exchanges.pathMatchers(HttpMethod.GET, "/api/posts/**").permitAll()
+        exchanges.pathMatchers(HttpMethod.GET, "/api/projects/**").permitAll()
+        exchanges.pathMatchers(HttpMethod.GET, "/api/testimonials/**").permitAll()
+        exchanges.pathMatchers(HttpMethod.GET, "/api/resume/**").permitAll()
         exchanges.pathMatchers(HttpMethod.GET, "/api/meta").permitAll()
+        
+        // CV generation endpoints (must be before /api/**)
+        exchanges.pathMatchers("/api/cv/**").permitAll()
         
         // Public POST endpoints (must be before /api/**)
         exchanges.pathMatchers(HttpMethod.POST, "/api/contact").permitAll()
