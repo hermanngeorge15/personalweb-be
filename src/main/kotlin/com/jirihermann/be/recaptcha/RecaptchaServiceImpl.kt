@@ -2,6 +2,7 @@ package com.jirihermann.be.recaptcha
 
 import com.jirihermann.be.config.RecaptchaProperties
 import org.slf4j.LoggerFactory
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitBody
@@ -28,10 +29,11 @@ class RecaptchaServiceImpl(
             return try {
                 val response = webClient.post()
                     .uri(properties.verifyUrl)
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                     .bodyValue(mapOf(
                         "secret" to properties.secretKey,
                         "response" to token,
-                        "remoteip" to (remoteIp ?: "8.8.8.8")
+                        "remoteip" to (remoteIp ?: "")
                     ))
                     .retrieve()
                     .awaitBody<RecaptchaVerifyResponse>()

@@ -49,7 +49,6 @@ class ContactController(
 
         val ip = (xff?.split(",")?.firstOrNull()?.trim()).takeUnless { it.isNullOrBlank() }
             ?: xri
-            ?: "unknown"
 
         // reCAPTCHA verification
         if (body.recaptchaToken.isNullOrBlank()) {
@@ -65,13 +64,13 @@ class ContactController(
 
         // Rate limiting
         val now = Instant.now()
-        val hits = lastHitByIp.computeIfAbsent(ip) { mutableListOf() }
-        hits.removeIf { Duration.between(it, now) > window }
-        if (hits.size >= maxRequests) {
-            logger.warn("Rate limit exceeded for IP: $ip")
-            return
-        }
-        hits.add(now)
+//        val hits = lastHitByIp.computeIfAbsent(ip) { mutableListOf() }
+//        hits.removeIf { Duration.between(it, now) > window }
+//        if (hits.size >= maxRequests) {
+//            logger.warn("Rate limit exceeded for IP: $ip")
+//            return
+//        }
+//        hits.add(now)
 
         // Save to database
         repo.save(
