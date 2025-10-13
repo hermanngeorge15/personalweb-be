@@ -91,6 +91,7 @@ class SecurityConfig {
         exchanges.pathMatchers(HttpMethod.GET, "/api/testimonials/**").permitAll()
         exchanges.pathMatchers(HttpMethod.GET, "/api/resume/**").permitAll()
         exchanges.pathMatchers(HttpMethod.GET, "/api/meta").permitAll()
+        exchanges.pathMatchers(HttpMethod.GET, "/api/version").permitAll()
         
         // CV generation endpoints (must be before /api/**)
         exchanges.pathMatchers("/api/cv/**").permitAll()
