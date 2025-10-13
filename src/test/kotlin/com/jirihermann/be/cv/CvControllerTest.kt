@@ -33,7 +33,7 @@ class CvControllerTest {
     coEvery { assembler.assemble("jiri", "en") } returns cv
     coEvery { renderer.renderCv(cv, any()) } returns byteArrayOf(1, 2, 3)
 
-    client.get().uri("/cv/jiri.en.pdf")
+    client.get().uri("/api/cv/jiri.en.pdf")
       .exchange()
       .expectStatus().isOk
       .expectHeader().contentType(MediaType.APPLICATION_PDF)
