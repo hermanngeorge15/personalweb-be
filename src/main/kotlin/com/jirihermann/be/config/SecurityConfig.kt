@@ -100,7 +100,7 @@ open class SecurityConfig {
         exchanges.pathMatchers(HttpMethod.POST, "/api/contact").permitAll()
         
         // CV generation endpoints
-        exchanges.pathMatchers("/cv/**").permitAll()
+        exchanges.pathMatchers("/api/cv/**").permitAll()
         
         // All other /api/** endpoints require ADMIN role
         exchanges.pathMatchers("/api/**").hasRole("ADMIN")
