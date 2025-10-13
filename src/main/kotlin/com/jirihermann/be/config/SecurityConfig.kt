@@ -109,13 +109,13 @@ class SecurityConfig {
         exchanges.anyExchange().denyAll()
       }
       
-      // OAuth2 Resource Server with JWT
+      // OAuth2 Resource Server with JWT - only authenticate when credentials are present
       .oauth2ResourceServer { rs ->
         rs.jwt { jwtSpec ->
           jwtSpec.jwtAuthenticationConverter(jwtAuthConverter())
         }
-        // Configure proper error handling
-        rs.authenticationEntryPoint { exchange, _ ->
+        // Custom authentication manager to allow anonymous access for public endpoints
+        rs.authenticationEntryPoint { exchange, ex ->
           exchange.response.statusCode = HttpStatus.UNAUTHORIZED
           Mono.empty()
         }
@@ -124,6 +124,7 @@ class SecurityConfig {
           Mono.empty()
         }
       }
+      .anonymous { } // Enable anonymous authentication for public endpoints
       .build()
 
   @Bean
