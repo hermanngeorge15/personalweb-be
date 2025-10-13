@@ -42,6 +42,11 @@ dependencies {
   // Sanitization for rich text fields
   implementation("org.jsoup:jsoup:1.17.2")
 
+  // AWS SES for email sending
+  implementation(platform("software.amazon.awssdk:bom:2.20.150"))
+  implementation("software.amazon.awssdk:ses")
+  implementation("software.amazon.awssdk:netty-nio-client")
+
   testImplementation("org.springframework.boot:spring-boot-starter-test")
   testImplementation("io.projectreactor:reactor-test")
   testImplementation("org.testcontainers:junit-jupiter")

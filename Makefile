@@ -1,4 +1,4 @@
-.PHONY: build up down logs seed smoke ps restart
+.PHONY: build up down logs seed smoke ps restart test-email
 
 build:
 	./gradlew bootJar -x test --no-daemon
@@ -23,6 +23,9 @@ seed:
 
 smoke:
 	./scripts/smoke.sh
+
+test-email:
+	./scripts/test-email.sh
 
 restart:
 	docker compose restart be

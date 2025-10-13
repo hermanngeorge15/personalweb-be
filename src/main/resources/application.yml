@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 8891
   forward-headers-strategy: native
 
 spring:
@@ -23,6 +23,8 @@ spring:
         jwt:
           issuer-uri: https://keycloak.kotlinserversquad.com/realms/personalblog
           jwk-set-uri: https://keycloak.kotlinserversquad.com/realms/personalblog/protocol/openid-connect/certs
+  cors:
+    enabled: false
 
 management:
   endpoints:
@@ -46,3 +48,21 @@ management:
 security:
   allowed-origins: ${ALLOWED_ORIGINS:http://localhost:3333,http://localhost:3335}
 
+aws:
+  ses:
+    region: ${AWS_REGION:us-east-1}
+    from-email: ${SES_FROM_EMAIL:noreply@example.com}
+    from-name: ${SES_FROM_NAME:Blog Notification}
+    enabled: ${SES_ENABLED:true}
+    access-key-id: ${AWS_ACCESS_KEY_ID:}
+    secret-access-key: ${AWS_SECRET_ACCESS_KEY:}
+
+email:
+  admin-email: ${ADMIN_EMAIL:admin@example.com}
+  contact-subject: ${CONTACT_SUBJECT:New Contact Form Submission}
+
+recaptcha:
+  enabled: ${RECAPTCHA_ENABLED:true}
+  secret-key: ${RECAPTCHA_SECRET_KEY:6Lf13OgrAAAAALxyuRJWZFhYhuPVv7u2581zXIBp}
+  verify-url: https://www.google.com/recaptcha/api/siteverify
+  minimum-score: ${RECAPTCHA_MINIMUM_SCORE:0.5}

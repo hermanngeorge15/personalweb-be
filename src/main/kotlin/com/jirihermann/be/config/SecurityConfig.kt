@@ -92,7 +92,8 @@ class SecurityConfig {
         exchanges.pathMatchers(HttpMethod.GET, "/api/resume/**").permitAll()
         exchanges.pathMatchers(HttpMethod.GET, "/api/meta").permitAll()
         exchanges.pathMatchers(HttpMethod.GET, "/api/version").permitAll()
-        
+        exchanges.pathMatchers(HttpMethod.GET, "/api/contact").permitAll()
+
         // CV generation endpoints (must be before /api/**)
         exchanges.pathMatchers("/api/cv/**").permitAll()
         
@@ -100,8 +101,8 @@ class SecurityConfig {
         exchanges.pathMatchers(HttpMethod.POST, "/api/contact").permitAll()
         
         // Admin-only contact endpoints
-        exchanges.pathMatchers(HttpMethod.GET, "/api/contact").hasRole("ADMIN")
-        exchanges.pathMatchers(HttpMethod.POST, "/api/contact/*/handle").hasRole("ADMIN")
+//        exchanges.pathMatchers(HttpMethod.GET, "/api/contact").hasRole("ADMIN")
+//        exchanges.pathMatchers(HttpMethod.POST, "/api/contact/*/handle").hasRole("ADMIN")
         
         // All other /api/** endpoints require ADMIN role (POST, PUT, PATCH, DELETE)
         exchanges.pathMatchers("/api/**").hasRole("ADMIN")

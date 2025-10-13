@@ -36,7 +36,29 @@ docker compose exec -T db psql -U personal -d personal -c \
 
 ## Configuration
 - `application.yml` supports env overrides for DB and Keycloak issuer.
-- See `.env.example` for common variables.
+- See `env.example` for common variables including AWS SES email setup.
+
+## Email Notifications
+
+Contact form submissions automatically send email notifications via AWS SES.
+
+**Quick Setup (10 min):**
+1. Verify sender email in [AWS SES Console](https://console.aws.amazon.com/ses/)
+2. Create IAM user with SES permissions and get access keys
+3. Configure environment variables (see `env.example`)
+4. Test with `./scripts/test-email.sh`
+
+**Documentation:**
+- 🚀 [Quick Start Guide](./docs/AWS_SES_QUICK_START.md) - Get emails working in 10 minutes
+- 📚 [Complete Setup Guide](./docs/AWS_SES_EMAIL_SETUP.md) - Detailed AWS SES setup
+- 🚢 [Deployment Guide](./docs/EMAIL_DEPLOYMENT_GUIDE.md) - Production deployment
+- 📋 [Feature Summary](./docs/EMAIL_FEATURE_SUMMARY.md) - Implementation overview
+
+**Disable emails** (for local dev without AWS):
+```bash
+export SES_ENABLED=false
+./gradlew bootRun
+```
 
 ## Endpoints
 - Public: `GET /api/meta`, `GET /api/posts`, `GET /api/posts/{slug}`, `GET /api/projects`, `GET /api/testimonials`, `GET /api/resume`, `POST /api/contact`
