@@ -1,12 +1,17 @@
 package com.jirihermann.be.post
 
+import com.jirihermann.be.tracing.withTracing
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.OffsetDateTime
 import java.util.UUID
 
 @Service
 class PostService(private val repo: PostRepo) {
-  suspend fun list(limit: Int, tag: String?, cursor: String?): PageDto<PostListItemDto> {
+  private val logger = LoggerFactory.getLogger(PostService::class.java)
+
+  suspend fun list(limit: Int, tag: String?, cursor: String?): PageDto<PostListItemDto> = withTracing {
+    logger.info("Listing posts: limit={}, tag={}, cursor={}", limit, tag, cursor?.take(20))
     val (cursorPublishedAt, cursorSlug) = decodeCursor(cursor)
     val entities = repo.listPublished(limit + 1, tag, cursorPublishedAt, cursorSlug)
     val items = entities.take(limit).map {
@@ -20,17 +25,25 @@ class PostService(private val repo: PostRepo) {
       )
     }
     val nextCursor = if (entities.size > limit) encodeCursor(items.last().published_at, items.last().slug) else null
-    return PageDto(items = items, nextCursor = nextCursor)
+    logger.info("Listed {} posts, hasMore={}", items.size, nextCursor != null)
+    PageDto(items = items, nextCursor = nextCursor)
   }
 
-  suspend fun getBySlug(slug: String): PostDetailDto? = repo.findBySlug(slug)?.let {
-    PostDetailDto(
-      slug = it.slug,
-      title = it.title,
-      content_mdx = it.content_mdx,
-      tags = it.tags,
-      published_at = it.published_at
-    )
+  suspend fun getBySlug(slug: String): PostDetailDto? = withTracing {
+    logger.info("Fetching post by slug: {}", slug)
+    repo.findBySlug(slug)?.let {
+      logger.info("Post found: slug={}, title={}", it.slug, it.title)
+      PostDetailDto(
+        slug = it.slug,
+        title = it.title,
+        content_mdx = it.content_mdx,
+        tags = it.tags,
+        published_at = it.published_at
+      )
+    } ?: run {
+      logger.info("Post not found: slug={}", slug)
+      null
+    }
   }
 
   // Admin
@@ -45,7 +58,8 @@ class PostService(private val repo: PostRepo) {
     val published_at: OffsetDateTime?
   )
 
-  suspend fun create(req: PostUpsertRequest): UUID {
+  suspend fun create(req: PostUpsertRequest): UUID = withTracing {
+    logger.info("Creating post: slug={}, title={}, status={}", req.slug, req.title, req.status)
     val saved = repo.save(
       PostEntity(
         slug = req.slug,
@@ -58,11 +72,17 @@ class PostService(private val repo: PostRepo) {
         published_at = req.published_at
       )
     )
-    return saved.id!!
+    logger.info("Post created successfully: id={}, slug={}", saved.id, saved.slug)
+    saved.id!!
   }
 
-  suspend fun update(id: UUID, req: PostUpsertRequest) {
-    val current = repo.findById(id) ?: return
+  suspend fun update(id: UUID, req: PostUpsertRequest): Unit = withTracing {
+    logger.info("Updating post: id={}, slug={}, status={}", id, req.slug, req.status)
+    val current = repo.findById(id)
+    if (current == null) {
+      logger.warn("Post not found for update: id={}", id)
+      return@withTracing
+    }
     repo.save(
       current.copy(
         slug = req.slug,
@@ -75,10 +95,13 @@ class PostService(private val repo: PostRepo) {
         published_at = req.published_at
       )
     )
+    logger.info("Post updated successfully: id={}, slug={}", id, req.slug)
   }
 
-  suspend fun delete(id: UUID) {
+  suspend fun delete(id: UUID): Unit = withTracing {
+    logger.info("Deleting post: id={}", id)
     repo.deleteById(id)
+    logger.info("Post deleted: id={}", id)
   }
 }
 

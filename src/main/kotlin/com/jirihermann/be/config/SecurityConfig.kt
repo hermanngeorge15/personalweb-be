@@ -166,13 +166,17 @@ class SecurityConfig {
       "Accept",
       "Origin",
       "Access-Control-Request-Method",
-      "Access-Control-Request-Headers"
+      "Access-Control-Request-Headers",
+      "X-Trace-Id",
+      "X-Span-Id"
     )
     
     // Expose headers that frontend needs to read
     config.exposedHeaders = listOf(
       "Access-Control-Allow-Origin",
-      "Access-Control-Allow-Credentials"
+      "Access-Control-Allow-Credentials",
+      "X-Trace-Id",
+      "X-Span-Id"
     )
     
     // Cache preflight requests (1 hour)

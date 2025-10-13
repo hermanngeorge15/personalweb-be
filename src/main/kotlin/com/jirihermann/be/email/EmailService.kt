@@ -26,6 +26,7 @@ class EmailService(
       return false
     }
 
+    logger.info("Sending email to: {}, subject: {}", request.to, request.subject)
     return try {
       withContext(Dispatchers.IO) {
         val destination = Destination.builder()
@@ -74,11 +75,12 @@ class EmailService(
    * Send contact form notification to admin
    */
   suspend fun sendContactFormNotification(data: ContactFormEmailData): Boolean {
+    logger.info("Sending contact form notification: from={}, name={}", data.email, data.name)
     val subject = emailProperties.contactSubject
     val textBody = buildContactFormTextBody(data)
     val htmlBody = buildContactFormHtmlBody(data)
 
-    return sendEmail(
+    val result = sendEmail(
       EmailRequest(
         to = emailProperties.adminEmail,
         subject = subject,
@@ -87,6 +89,14 @@ class EmailService(
         replyTo = data.email
       )
     )
+    
+    if (result) {
+      logger.info("Contact form notification sent successfully: from={}", data.email)
+    } else {
+      logger.error("Failed to send contact form notification: from={}", data.email)
+    }
+    
+    return result
   }
 
   /**

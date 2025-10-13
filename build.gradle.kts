@@ -29,9 +29,14 @@ dependencies {
   implementation("org.flywaydb:flyway-core")
   implementation("org.flywaydb:flyway-database-postgresql:10.10.0")
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.9.0")
+  implementation("io.micrometer:micrometer-tracing-bridge-otel") // or :micrometer-tracing-bridge-brave
+  implementation("io.opentelemetry:opentelemetry-exporter-otlp") // optional exporter
+  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:1.9.0")
   implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
   runtimeOnly("org.postgresql:postgresql")
   runtimeOnly("org.postgresql:r2dbc-postgresql")
+
+  implementation("net.logstash.logback:logstash-logback-encoder:7.4")
 
   implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.6.0")
 
