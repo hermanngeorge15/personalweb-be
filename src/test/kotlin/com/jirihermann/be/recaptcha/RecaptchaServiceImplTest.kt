@@ -25,7 +25,10 @@ class RecaptchaServiceTest {
 
     @Test
     fun `verifyToken returns failure when secret key is missing`() = runTest {
-        val properties = RecaptchaProperties(enabled = true, secretKey = "")
+        val properties = RecaptchaProperties(
+            enabled = true,
+            secret = ""
+        )
         val webClient = mockk<WebClient>()
         val service = RecaptchaServiceImpl(properties, webClient)
 

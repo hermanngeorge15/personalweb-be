@@ -53,18 +53,20 @@ security:
 aws:
   ses:
     region: ${AWS_REGION:us-east-1}
-    from-email: ${SES_FROM_EMAIL:noreply@example.com}
+    from-email: ${SES_FROM_EMAIL:noreply@jirihermann.com}
     from-name: ${SES_FROM_NAME:Blog Notification}
     enabled: ${SES_ENABLED:true}
     access-key-id: ${AWS_ACCESS_KEY_ID:}
     secret-access-key: ${AWS_SECRET_ACCESS_KEY:}
 
 email:
-  admin-email: ${ADMIN_EMAIL:admin@example.com}
+  admin-email: ${ADMIN_EMAIL:me@jirihermann.com}
   contact-subject: ${CONTACT_SUBJECT:New Contact Form Submission}
 
 recaptcha:
   enabled: ${RECAPTCHA_ENABLED:true}
-  secret-key: ${RECAPTCHA_SECRET_KEY:6Lf13OgrAAAAALxyuRJWZFhYhuPVv7u2581zXIBp}
+  secret: ${RECAPTCHA_SECRET:6Leg1ekrAAAAAFb4wsWVqLfjo--T6eJYxCMXdad0}
   verify-url: https://www.google.com/recaptcha/api/siteverify
   minimum-score: ${RECAPTCHA_MINIMUM_SCORE:0.5}
+  expected-action: ${RECAPTCHA_EXPECTED_ACTION:contact_form}
+  expected-hostname: ${RECAPTCHA_EXPECTED_HOSTNAME:}

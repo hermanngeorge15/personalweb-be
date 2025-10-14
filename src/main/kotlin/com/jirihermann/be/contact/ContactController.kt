@@ -57,8 +57,28 @@ class ContactController(
         }
 
         val recaptchaResult = recaptchaService.verifyToken(body.recaptchaToken, ip)
-        if (!recaptchaResult.success || !recaptchaService.isScoreAcceptable(recaptchaResult.score)) {
-            logger.warn("reCAPTCHA verification failed for IP: $ip, score: ${recaptchaResult.score}")
+        
+        // Verify success
+        if (!recaptchaResult.success) {
+            logger.warn("reCAPTCHA verification failed for IP: $ip, errors: ${recaptchaResult.errorCodes}")
+            throw IllegalArgumentException("CAPTCHA verification failed")
+        }
+        
+        // Verify action
+        if (!recaptchaService.isActionValid(recaptchaResult.action)) {
+            logger.warn("reCAPTCHA action mismatch for IP: $ip, expected: submit, got: ${recaptchaResult.action}")
+            throw IllegalArgumentException("CAPTCHA action mismatch")
+        }
+        
+        // Verify hostname (optional)
+        if (!recaptchaService.isHostnameValid(recaptchaResult.hostname)) {
+            logger.warn("reCAPTCHA hostname mismatch for IP: $ip, got: ${recaptchaResult.hostname}")
+            throw IllegalArgumentException("CAPTCHA hostname mismatch")
+        }
+        
+        // Verify score
+        if (!recaptchaService.isScoreAcceptable(recaptchaResult.score)) {
+            logger.warn("reCAPTCHA score too low for IP: $ip, score: ${recaptchaResult.score}")
             throw IllegalArgumentException("CAPTCHA verification failed")
         }
 

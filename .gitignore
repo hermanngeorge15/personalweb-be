@@ -17,3 +17,6 @@ local.properties
 
 /docs/00_CAPTCHA_START_HERE.md
 /docs/API_ENDPOINTS_CHECKLIST.md
+/docs/*
+/src/main/resources/application-prod.yml
+/scripts/*
