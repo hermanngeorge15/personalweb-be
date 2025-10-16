@@ -65,7 +65,7 @@ email:
 
 recaptcha:
   enabled: ${RECAPTCHA_ENABLED:true}
-  secret: ${RECAPTCHA_SECRET:xxx}
+  secret: ${RECAPTCHA_SECRET:}
   verify-url: https://www.google.com/recaptcha/api/siteverify
   minimum-score: ${RECAPTCHA_MINIMUM_SCORE:0.5}
   expected-action: ${RECAPTCHA_EXPECTED_ACTION:contact_form}
