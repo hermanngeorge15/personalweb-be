@@ -49,7 +49,7 @@ class ContactController(
 
         val ip = (xff?.split(",")?.firstOrNull()?.trim()).takeUnless { it.isNullOrBlank() }
             ?: xri
-
+        logger.info("IP address for contact form submission: $ip")
         // reCAPTCHA verification
         if (body.recaptchaToken.isNullOrBlank()) {
             logger.warn("Missing reCAPTCHA token from IP: $ip")

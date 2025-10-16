@@ -29,16 +29,7 @@ class AwsSesConfig(
     val credentialsProvider: AwsCredentialsProvider = if (
       !properties.accessKeyId.isNullOrBlank() && !properties.secretAccessKey.isNullOrBlank()
     ) {
-      logger.info("Using provided access keys for AWS SES")
-      val maskedAccessKeyId = properties.accessKeyId.let {
-          if (it.length > 8) "********${it.substring(8)}" else "********"
-      }
-      val maskedSecretKey = properties.secretAccessKey.let {
-          if (it.length > 8) "********${it.substring(12)}" else "********"
-      }
-
-      logger.info("Access key ID: $maskedAccessKeyId")
-      logger.info("Secret access key: $maskedSecretKey")
+      logger.debug("Using provided access keys for AWS SES")
       // Use provided access keys
       StaticCredentialsProvider.create(
         AwsBasicCredentials.create(properties.accessKeyId, properties.secretAccessKey)
