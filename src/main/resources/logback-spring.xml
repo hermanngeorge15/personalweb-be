@@ -131,6 +131,14 @@
         </root>
     </springProfile>
 
+    <!-- dev: pretty console + file -->
+    <springProfile name="test">
+        <root level="INFO">
+            <appender-ref ref="ASYNC_CONSOLE"/>
+            <appender-ref ref="ASYNC_FILE"/>
+        </root>
+    </springProfile>
+
     <!-- prod: JSON stdout (+ JSON file) -->
     <springProfile name="prod">
         <root level="INFO">

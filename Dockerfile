@@ -19,7 +19,6 @@ ARG VERSION
 LABEL org.opencontainers.image.created="${BUILD_DATE}" \
       org.opencontainers.image.authors="Jiri Hermann" \
       org.opencontainers.image.url="https://jirihermann.com" \
-      org.opencontainers.image.source="https://github.com/jirihermann/workspace-fullstack" \
       org.opencontainers.image.version="${VERSION}" \
       org.opencontainers.image.revision="${VCS_REF}" \
       org.opencontainers.image.vendor="Jiri Hermann" \
