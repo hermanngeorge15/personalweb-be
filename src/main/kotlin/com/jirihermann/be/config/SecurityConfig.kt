@@ -57,7 +57,15 @@ class SecurityConfig {
         headers
           .frameOptions { it.disable() } // API doesn't need frame protection
           .contentSecurityPolicy { csp ->
-            csp.policyDirectives("default-src 'none'; frame-ancestors 'none'")
+            csp.policyDirectives(
+              "default-src 'none'; " +
+              "script-src 'self' 'unsafe-inline'; " +
+              "style-src 'self' 'unsafe-inline'; " +
+              "img-src 'self' data:; " +
+              "font-src 'self'; " +
+              "connect-src 'self'; " +
+              "frame-ancestors 'none'"
+            )
           }
           .referrerPolicy { referrer ->
             referrer.policy(ReferrerPolicyServerHttpHeadersWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN)

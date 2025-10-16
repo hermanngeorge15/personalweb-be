@@ -52,7 +52,7 @@ security:
 
 aws:
   ses:
-    region: ${AWS_REGION:us-east-1}
+    region: ${AWS_REGION:eu-west-1}
     from-email: ${SES_FROM_EMAIL:noreply@jirihermann.com}
     from-name: ${SES_FROM_NAME:Blog Notification}
     enabled: ${SES_ENABLED:true}
