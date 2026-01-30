@@ -53,4 +53,53 @@ class KotlinLearningController(private val service: KotlinLearningService) {
         description = "Returns all topics and their dependencies for rendering the interactive mind map"
     )
     suspend fun getMindMap() = service.getMindMap()
+
+    // =====================================================
+    // Tiered Content Endpoints
+    // =====================================================
+
+    @GetMapping("/topics/{id}/tiered")
+    @Operation(
+        summary = "Get topic with tiered content",
+        description = "Returns topic with multi-level explanations: TL;DR, Beginner, Intermediate, Deep Dive"
+    )
+    suspend fun getTopicWithTiers(
+        @PathVariable id: String,
+        @Parameter(
+            description = "Source language for code comparisons: 'java' or 'csharp'",
+            example = "java"
+        )
+        @RequestParam(required = false) sourceLanguage: String?,
+        @Parameter(
+            description = "Tier level (1-4). If not specified, returns all available tiers.",
+            example = "2"
+        )
+        @RequestParam(required = false) tier: Int?
+    ): KotlinTopicWithTiersDto {
+        return service.getTopicWithTiers(id, sourceLanguage, tier)
+            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Topic not found: $id")
+    }
+
+    // =====================================================
+    // Expense Tracker Journey Endpoints
+    // =====================================================
+
+    @GetMapping("/expense-tracker/chapters")
+    @Operation(
+        summary = "List expense tracker chapters",
+        description = "Returns all chapters of the expense tracker tutorial journey"
+    )
+    suspend fun listExpenseTrackerChapters() = service.listExpenseTrackerChapters()
+
+    @GetMapping("/expense-tracker/chapters/{chapterNumber}")
+    @Operation(
+        summary = "Get expense tracker chapter",
+        description = "Returns full chapter content with linked topics and implementation steps"
+    )
+    suspend fun getExpenseTrackerChapter(
+        @PathVariable chapterNumber: Int
+    ): ExpenseTrackerChapterDetailDto {
+        return service.getExpenseTrackerChapter(chapterNumber)
+            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Chapter not found: $chapterNumber")
+    }
 }
