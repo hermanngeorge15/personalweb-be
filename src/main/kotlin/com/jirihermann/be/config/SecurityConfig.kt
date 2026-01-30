@@ -101,6 +101,7 @@ class SecurityConfig {
         exchanges.pathMatchers(HttpMethod.GET, "/api/meta").permitAll()
         exchanges.pathMatchers(HttpMethod.GET, "/api/version").permitAll()
         exchanges.pathMatchers(HttpMethod.GET, "/api/contact").permitAll()
+        exchanges.pathMatchers(HttpMethod.GET, "/api/learn-kotlin/**").permitAll()
 
         // CV generation endpoints (must be before /api/**)
         exchanges.pathMatchers("/api/cv/**").permitAll()

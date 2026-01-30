@@ -36,6 +36,10 @@ dependencies {
   runtimeOnly("org.postgresql:postgresql")
   runtimeOnly("org.postgresql:r2dbc-postgresql")
 
+
+    implementation("org.springframework.boot:spring-boot-starter-data-redis-reactive")
+    implementation("io.lettuce:lettuce-core")
+
   implementation("net.logstash.logback:logstash-logback-encoder:7.4")
 
   implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.6.0")

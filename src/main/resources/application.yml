@@ -8,12 +8,12 @@ spring:
   application:
     name: be
   r2dbc:
-    url: ${R2DBC_URL:r2dbc:postgresql://localhost:5432/personal}
+    url: ${R2DBC_URL:r2dbc:postgresql://localhost:5433/personal}
     username: ${DB_USER:personal}
     password: ${DB_PASSWORD:personal}
   flyway:
     enabled: true
-    url: ${FLYWAY_URL:jdbc:postgresql://localhost:5432/personal}
+    url: ${FLYWAY_URL:jdbc:postgresql://localhost:5433/personal}
     user: ${FLYWAY_USER:personal}
     password: ${FLYWAY_PASSWORD:personal}
   jackson:
