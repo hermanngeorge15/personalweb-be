@@ -47,6 +47,28 @@ class KotlinLearningController(private val service: KotlinLearningService) {
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Topic not found: $id")
     }
 
+    @GetMapping("/topics/{id}/tiered")
+    @Operation(
+        summary = "Get topic with tiered content",
+        description = "Returns topic with multi-level content tiers (TL;DR, Beginner, Intermediate, Deep Dive)"
+    )
+    suspend fun getTopicWithTiers(
+        @PathVariable id: String,
+        @Parameter(
+            description = "Source language for code comparisons: 'java' or 'csharp'. If not specified, returns all examples.",
+            example = "java"
+        )
+        @RequestParam(required = false) sourceLanguage: String?,
+        @Parameter(
+            description = "Maximum tier level to include (1-4). If not specified, returns all available tiers.",
+            example = "2"
+        )
+        @RequestParam(required = false) tier: Int?
+    ): KotlinTopicWithTiersDto {
+        return service.getTopicWithTiers(id, sourceLanguage, tier)
+            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Topic not found: $id")
+    }
+
     @GetMapping("/mindmap")
     @Operation(
         summary = "Get mind map data",
