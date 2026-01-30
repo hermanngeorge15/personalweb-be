@@ -15,10 +15,10 @@ data class KotlinTopicEntity(
     val kotlin_code: String,
     val reading_time_minutes: Int = 10,
     val order_index: Int = 0,
-    val content_structure: String = "flat", // flat or tiered
-    val max_tier_level: Int = 1, // 1-4
-    val part_number: Int = 1,
+    val part_number: Int? = null,
     val part_name: String? = null,
+    val content_structure: String? = "tiered",
+    val max_tier_level: Int = 2,
     val created_at: OffsetDateTime = OffsetDateTime.now(),
     val updated_at: OffsetDateTime = OffsetDateTime.now()
 )
@@ -67,64 +67,59 @@ data class KotlinTopicDependencyEntity(
     val created_at: OffsetDateTime = OffsetDateTime.now()
 )
 
-// Content tier for multi-level explanations
 @Table("kotlin_content_tier")
 data class KotlinContentTierEntity(
     @Id val id: Int? = null,
     val topic_id: String,
-    val tier_level: Int, // 1=TL;DR, 2=Beginner, 3=Intermediate, 4=Deep Dive
+    val tier_level: Int,
     val tier_name: String,
     val title: String?,
     val explanation: String,
-    val code_examples: String?, // JSON array
+    val code_examples: String? = null,
     val reading_time_minutes: Int = 5,
-    val learning_objectives: String?, // JSON array
-    val prerequisites: String?, // JSON array of topic IDs
-    val created_at: OffsetDateTime = OffsetDateTime.now(),
-    val updated_at: OffsetDateTime = OffsetDateTime.now()
-)
-
-// Runnable examples for Kotlin Playground
-@Table("kotlin_runnable_example")
-data class KotlinRunnableExampleEntity(
-    @Id val id: Int? = null,
-    val topic_id: String,
-    val tier_level: Int = 1,
-    val title: String,
-    val description: String?,
-    val code: String,
-    val expected_output: String?,
+    val learning_objectives: String? = null,
+    val prerequisites: String? = null,
     val order_index: Int = 0,
     val created_at: OffsetDateTime = OffsetDateTime.now()
 )
 
-// Expense Tracker tutorial chapters
+@Table("kotlin_runnable_example")
+data class KotlinRunnableExampleEntity(
+    @Id val id: Int? = null,
+    val topic_id: String,
+    val title: String,
+    val description: String?,
+    val code: String,
+    val expected_output: String?,
+    val tier_level: Int = 2,
+    val order_index: Int = 0,
+    val created_at: OffsetDateTime = OffsetDateTime.now()
+)
+
 @Table("kotlin_expense_tracker_chapter")
 data class KotlinExpenseTrackerChapterEntity(
     @Id val id: Int? = null,
     val chapter_number: Int,
     val title: String,
     val description: String?,
-    val topic_ids: String?, // JSON array
     val introduction: String?,
-    val implementation_steps: String?, // JSON array
-    val code_snippets: String?, // JSON array
+    val implementation_steps: String?,
+    val code_snippets: String?,
     val summary: String?,
+    val difficulty: String = "beginner",
+    val estimated_time_minutes: Int = 30,
     val previous_chapter: Int?,
     val next_chapter: Int?,
-    val estimated_time_minutes: Int = 30,
-    val difficulty: String = "beginner",
-    val created_at: OffsetDateTime = OffsetDateTime.now(),
-    val updated_at: OffsetDateTime = OffsetDateTime.now()
+    val created_at: OffsetDateTime = OffsetDateTime.now()
 )
 
-// Link between topics and expense tracker chapters
 @Table("kotlin_topic_chapter_link")
 data class KotlinTopicChapterLinkEntity(
     @Id val id: Int? = null,
     val topic_id: String,
     val chapter_id: Int,
-    val usage_type: String = "primary", // primary, secondary, reference
+    val usage_type: String,
     val context_description: String?,
+    val order_index: Int = 0,
     val created_at: OffsetDateTime = OffsetDateTime.now()
 )

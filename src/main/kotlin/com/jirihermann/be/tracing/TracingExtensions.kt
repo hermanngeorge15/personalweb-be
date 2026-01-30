@@ -111,3 +111,6 @@ suspend fun logWithTrace(message: () -> String): String {
     return "[trace=$traceId span=$spanId] ${message()}"
 }
 
+
+
+

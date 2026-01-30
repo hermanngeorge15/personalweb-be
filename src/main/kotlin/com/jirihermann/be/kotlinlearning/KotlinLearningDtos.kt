@@ -84,19 +84,17 @@ data class ModuleDto(
 // Tiered Content DTOs
 // =====================================================
 
-// Content tier DTO (one level of explanation)
 data class KotlinContentTierDto(
-    val tierLevel: Int, // 1=TL;DR, 2=Beginner, 3=Intermediate, 4=Deep Dive
+    val tierLevel: Int,
     val tierName: String,
     val title: String?,
     val explanation: String,
-    val codeExamples: List<String>?, // Parsed from JSON
+    val codeExamples: List<String>?,
     val readingTimeMinutes: Int,
     val learningObjectives: List<String>?,
     val prerequisites: List<String>?
 )
 
-// Runnable example DTO (for Kotlin Playground)
 data class KotlinRunnableExampleDto(
     val title: String,
     val description: String?,
@@ -105,28 +103,30 @@ data class KotlinRunnableExampleDto(
     val tierLevel: Int
 )
 
-// Topic with tiered content
 data class KotlinTopicWithTiersDto(
     val id: String,
     val title: String,
     val module: String,
     val difficulty: String,
     val description: String?,
-    val partNumber: Int,
+    val partNumber: Int?,
     val partName: String?,
-    val contentStructure: String, // flat or tiered
+    val contentStructure: String?,
     val maxTierLevel: Int,
     val availableTiers: List<Int>,
     val tiers: List<KotlinContentTierDto>,
     val runnableExamples: List<KotlinRunnableExampleDto>,
-    val codeExamples: List<KotlinCodeExampleDto>, // Language comparisons
+    val codeExamples: List<KotlinCodeExampleDto>,
     val experiences: List<KotlinExperienceDto>,
     val docLinks: List<KotlinDocLinkDto>,
     val navigation: TopicNavigationDto?,
-    val expenseTrackerChapters: List<ExpenseTrackerChapterRefDto>? // Which chapters use this topic
+    val expenseTrackerChapters: List<ExpenseTrackerChapterRefDto>?
 )
 
-// Reference to an expense tracker chapter
+// =====================================================
+// Expense Tracker DTOs
+// =====================================================
+
 data class ExpenseTrackerChapterRefDto(
     val chapterNumber: Int,
     val title: String,
@@ -134,11 +134,6 @@ data class ExpenseTrackerChapterRefDto(
     val contextDescription: String?
 )
 
-// =====================================================
-// Expense Tracker Journey DTOs
-// =====================================================
-
-// Chapter list item
 data class ExpenseTrackerChapterListDto(
     val chapterNumber: Int,
     val title: String,
@@ -148,7 +143,6 @@ data class ExpenseTrackerChapterListDto(
     val topicCount: Int
 )
 
-// Full chapter detail
 data class ExpenseTrackerChapterDetailDto(
     val chapterNumber: Int,
     val title: String,
@@ -160,17 +154,9 @@ data class ExpenseTrackerChapterDetailDto(
     val difficulty: String,
     val estimatedTimeMinutes: Int,
     val topics: List<ExpenseTrackerTopicRefDto>,
-    val navigation: ChapterNavigationDto?
+    val navigation: ChapterNavigationDto
 )
 
-// Code snippet in a chapter
-data class ExpenseTrackerCodeSnippetDto(
-    val title: String?,
-    val code: String,
-    val explanation: String?
-)
-
-// Topic reference from a chapter
 data class ExpenseTrackerTopicRefDto(
     val topicId: String,
     val topicTitle: String,
@@ -178,7 +164,13 @@ data class ExpenseTrackerTopicRefDto(
     val contextDescription: String?
 )
 
-// Chapter navigation
+data class ExpenseTrackerCodeSnippetDto(
+    val filename: String,
+    val language: String,
+    val code: String,
+    val explanation: String?
+)
+
 data class ChapterNavigationDto(
     val previous: Int?,
     val next: Int?
