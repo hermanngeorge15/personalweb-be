@@ -203,7 +203,7 @@ VALUES (
     'intermediate',
     'Create restricted class hierarchies for exhaustive when expressions',
     E'**Sealed classes** restrict which classes can inherit from them.\n\n## Benefits\n\n- Compiler knows ALL possible subclasses\n- Exhaustive `when` expressions (no `else` needed)\n- Perfect for state machines, results, UI states\n\n## Rules\n\n- Subclasses must be in same package\n- Can be `data class`, `object`, or regular `class`',
-    E'sealed class Result<out T> {\n    data class Success<T>(val data: T) : Result<T>()\n    data class Error(val message: String) : Result<Nothing>()\n    data object Loading : Result<Nothing>()\n}\n\n// Exhaustive when - no else needed!\nfun handleResult(result: Result<String>) = when (result) {\n    is Result.Success -> "Data: ${result.data}"\n    is Result.Error -> "Error: ${result.message}"\n    Result.Loading -> "Loading..."\n    // Compiler verifies all cases covered!\n}',
+    E'sealed class Result<out T> {\n    data class Success<T>(val data: T) : Result<T>()\n    data class Error(val message: String) : Result<Nothing>()\n    data object Loading : Result<Nothing>()\n}\n\n// Exhaustive when - no else needed!\nfun handleResult(result: Result<String>) = when (result) {\n    is Result.Success -> "Data: $${result.data}"\n    is Result.Error -> "Error: $${result.message}"\n    Result.Loading -> "Loading..."\n    // Compiler verifies all cases covered!\n}',
     15,
     9
 );
@@ -410,7 +410,7 @@ VALUES (
     'intermediate',
     'Master let, run, with, apply, and also for cleaner code',
     E'**Scope functions** execute code blocks on objects.\n\n## Quick Reference\n\n| Function | Context | Returns | Use case |\n|----------|---------|---------|----------|\n| `let` | `it` | Lambda result | Null checks, transformations |\n| `run` | `this` | Lambda result | Object configuration + result |\n| `with` | `this` | Lambda result | Group calls on object |\n| `apply` | `this` | Object | Object configuration |\n| `also` | `it` | Object | Side effects |',
-    E'val user = User("John", "john@example.com")\n\n// let - transform and null safety\nval length = user.name?.let { it.length } ?: 0\n\n// apply - configure object\nval config = Config().apply {\n    host = "localhost"\n    port = 8080\n}\n\n// also - side effects\nval result = user.also { \n    println("Processing: ${it.name}")\n}\n\n// run - compute with context\nval greeting = user.run {\n    "Hello, $name!"\n}\n\n// with - group operations\nwith(StringBuilder()) {\n    append("Hello")\n    append(" ")\n    append("World")\n    toString()\n}',
+    E'val user = User("John", "john@example.com")\n\n// let - transform and null safety\nval length = user.name?.let { it.length } ?: 0\n\n// apply - configure object\nval config = Config().apply {\n    host = "localhost"\n    port = 8080\n}\n\n// also - side effects\nval result = user.also { \n    println("Processing: $${it.name}")\n}\n\n// run - compute with context\nval greeting = user.run {\n    "Hello, $name!"\n}\n\n// with - group operations\nwith(StringBuilder()) {\n    append("Hello")\n    append(" ")\n    append("World")\n    toString()\n}',
     15,
     17
 );
