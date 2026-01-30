@@ -49,3 +49,35 @@ interface KotlinTopicDependencyRepo : CoroutineCrudRepository<KotlinTopicDepende
     @Query("SELECT * FROM kotlin_topic_dependency")
     fun findAllDependencies(): Flow<KotlinTopicDependencyEntity>
 }
+
+interface KotlinContentTierRepo : CoroutineCrudRepository<KotlinContentTierEntity, Int> {
+    @Query("SELECT * FROM kotlin_content_tier WHERE topic_id = :topicId ORDER BY tier_level ASC")
+    fun findByTopicId(topicId: String): Flow<KotlinContentTierEntity>
+
+    @Query("SELECT * FROM kotlin_content_tier WHERE topic_id = :topicId AND tier_level <= :maxTier ORDER BY tier_level ASC")
+    fun findByTopicIdUpToTier(topicId: String, maxTier: Int): Flow<KotlinContentTierEntity>
+}
+
+interface KotlinRunnableExampleRepo : CoroutineCrudRepository<KotlinRunnableExampleEntity, Int> {
+    @Query("SELECT * FROM kotlin_runnable_example WHERE topic_id = :topicId ORDER BY order_index ASC")
+    fun findByTopicId(topicId: String): Flow<KotlinRunnableExampleEntity>
+
+    @Query("SELECT * FROM kotlin_runnable_example WHERE topic_id = :topicId AND tier_level <= :maxTier ORDER BY order_index ASC")
+    fun findByTopicIdUpToTier(topicId: String, maxTier: Int): Flow<KotlinRunnableExampleEntity>
+}
+
+interface KotlinExpenseTrackerChapterRepo : CoroutineCrudRepository<KotlinExpenseTrackerChapterEntity, Int> {
+    @Query("SELECT * FROM kotlin_expense_tracker_chapter ORDER BY chapter_number ASC")
+    fun findAllOrdered(): Flow<KotlinExpenseTrackerChapterEntity>
+
+    @Query("SELECT * FROM kotlin_expense_tracker_chapter WHERE chapter_number = :chapterNumber")
+    suspend fun findByChapterNumber(chapterNumber: Int): KotlinExpenseTrackerChapterEntity?
+}
+
+interface KotlinTopicChapterLinkRepo : CoroutineCrudRepository<KotlinTopicChapterLinkEntity, Int> {
+    @Query("SELECT * FROM kotlin_topic_chapter_link WHERE topic_id = :topicId ORDER BY order_index ASC")
+    fun findByTopicId(topicId: String): Flow<KotlinTopicChapterLinkEntity>
+
+    @Query("SELECT * FROM kotlin_topic_chapter_link WHERE chapter_id = :chapterId ORDER BY order_index ASC")
+    fun findByChapterId(chapterId: Int): Flow<KotlinTopicChapterLinkEntity>
+}

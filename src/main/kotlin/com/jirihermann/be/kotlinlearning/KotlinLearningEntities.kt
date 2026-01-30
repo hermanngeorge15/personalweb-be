@@ -15,6 +15,10 @@ data class KotlinTopicEntity(
     val kotlin_code: String,
     val reading_time_minutes: Int = 10,
     val order_index: Int = 0,
+    val part_number: Int? = null,
+    val part_name: String? = null,
+    val content_structure: String? = "tiered",
+    val max_tier_level: Int = 2,
     val created_at: OffsetDateTime = OffsetDateTime.now(),
     val updated_at: OffsetDateTime = OffsetDateTime.now()
 )
@@ -60,5 +64,62 @@ data class KotlinTopicDependencyEntity(
     val topic_id: String,
     val depends_on_topic_id: String,
     val dependency_type: String,
+    val created_at: OffsetDateTime = OffsetDateTime.now()
+)
+
+@Table("kotlin_content_tier")
+data class KotlinContentTierEntity(
+    @Id val id: Int? = null,
+    val topic_id: String,
+    val tier_level: Int,
+    val tier_name: String,
+    val title: String?,
+    val explanation: String,
+    val code_examples: String? = null,
+    val reading_time_minutes: Int = 5,
+    val learning_objectives: String? = null,
+    val prerequisites: String? = null,
+    val order_index: Int = 0,
+    val created_at: OffsetDateTime = OffsetDateTime.now()
+)
+
+@Table("kotlin_runnable_example")
+data class KotlinRunnableExampleEntity(
+    @Id val id: Int? = null,
+    val topic_id: String,
+    val title: String,
+    val description: String?,
+    val code: String,
+    val expected_output: String?,
+    val tier_level: Int = 2,
+    val order_index: Int = 0,
+    val created_at: OffsetDateTime = OffsetDateTime.now()
+)
+
+@Table("kotlin_expense_tracker_chapter")
+data class KotlinExpenseTrackerChapterEntity(
+    @Id val id: Int? = null,
+    val chapter_number: Int,
+    val title: String,
+    val description: String?,
+    val introduction: String?,
+    val implementation_steps: String?,
+    val code_snippets: String?,
+    val summary: String?,
+    val difficulty: String = "beginner",
+    val estimated_time_minutes: Int = 30,
+    val previous_chapter: Int?,
+    val next_chapter: Int?,
+    val created_at: OffsetDateTime = OffsetDateTime.now()
+)
+
+@Table("kotlin_topic_chapter_link")
+data class KotlinTopicChapterLinkEntity(
+    @Id val id: Int? = null,
+    val topic_id: String,
+    val chapter_id: Int,
+    val usage_type: String,
+    val context_description: String?,
+    val order_index: Int = 0,
     val created_at: OffsetDateTime = OffsetDateTime.now()
 )
