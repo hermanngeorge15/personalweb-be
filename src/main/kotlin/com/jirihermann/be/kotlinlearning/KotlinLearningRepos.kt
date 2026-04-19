@@ -75,9 +75,9 @@ interface KotlinExpenseTrackerChapterRepo : CoroutineCrudRepository<KotlinExpens
 }
 
 interface KotlinTopicChapterLinkRepo : CoroutineCrudRepository<KotlinTopicChapterLinkEntity, Int> {
-    @Query("SELECT * FROM kotlin_topic_chapter_link WHERE topic_id = :topicId ORDER BY order_index ASC")
+    @Query("SELECT * FROM kotlin_topic_chapter_link WHERE topic_id = :topicId ORDER BY id ASC")
     fun findByTopicId(topicId: String): Flow<KotlinTopicChapterLinkEntity>
 
-    @Query("SELECT * FROM kotlin_topic_chapter_link WHERE chapter_id = :chapterId ORDER BY order_index ASC")
+    @Query("SELECT * FROM kotlin_topic_chapter_link WHERE chapter_id = :chapterId ORDER BY id ASC")
     fun findByChapterId(chapterId: Int): Flow<KotlinTopicChapterLinkEntity>
 }

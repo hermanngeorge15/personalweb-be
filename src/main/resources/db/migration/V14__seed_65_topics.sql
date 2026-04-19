@@ -1,4 +1,4 @@
--- V13: Seed 65 Kotlin Learning Topics
+-- V14: Seed 65 Kotlin Learning Topics
 -- Based on "Kotlin in Action" book structure
 
 -- Update existing topic with part info
@@ -51,7 +51,19 @@ VALUES
  'Try-catch as expressions, no checked exceptions',
  'Kotlin doesn''t have checked exceptions. try-catch is an expression that returns a value.',
  E'val result = try {\n    parseInt(input)\n} catch (e: NumberFormatException) {\n    0\n}',
- 10, 8, 1, 'Kotlin Fundamentals', 3);
+ 10, 8, 1, 'Kotlin Fundamentals', 3)
+ON CONFLICT (id) DO UPDATE SET
+    title = EXCLUDED.title,
+    module = EXCLUDED.module,
+    difficulty = EXCLUDED.difficulty,
+    description = EXCLUDED.description,
+    kotlin_explanation = EXCLUDED.kotlin_explanation,
+    kotlin_code = EXCLUDED.kotlin_code,
+    reading_time_minutes = EXCLUDED.reading_time_minutes,
+    order_index = EXCLUDED.order_index,
+    part_number = EXCLUDED.part_number,
+    part_name = EXCLUDED.part_name,
+    max_tier_level = EXCLUDED.max_tier_level;
 
 -- Chapter 2: Functions
 INSERT INTO kotlin_topic (id, title, module, difficulty, description, kotlin_explanation, kotlin_code, reading_time_minutes, order_index, part_number, part_name, max_tier_level)
@@ -84,7 +96,19 @@ VALUES
  'Define functions inside functions for encapsulation',
  'Local functions can access variables from the enclosing function.',
  E'fun process(data: List<Int>) {\n    fun validate(item: Int) = item > 0\n    data.filter(::validate).forEach { println(it) }\n}',
- 8, 13, 1, 'Kotlin Fundamentals', 2);
+ 8, 13, 1, 'Kotlin Fundamentals', 2)
+ON CONFLICT (id) DO UPDATE SET
+    title = EXCLUDED.title,
+    module = EXCLUDED.module,
+    difficulty = EXCLUDED.difficulty,
+    description = EXCLUDED.description,
+    kotlin_explanation = EXCLUDED.kotlin_explanation,
+    kotlin_code = EXCLUDED.kotlin_code,
+    reading_time_minutes = EXCLUDED.reading_time_minutes,
+    order_index = EXCLUDED.order_index,
+    part_number = EXCLUDED.part_number,
+    part_name = EXCLUDED.part_name,
+    max_tier_level = EXCLUDED.max_tier_level;
 
 -- Chapter 3: Collections
 INSERT INTO kotlin_topic (id, title, module, difficulty, description, kotlin_explanation, kotlin_code, reading_time_minutes, order_index, part_number, part_name, max_tier_level)
@@ -105,7 +129,19 @@ VALUES
  'Lazy evaluation for large collections',
  'Sequences process elements lazily, one at a time, avoiding intermediate collections.',
  E'val result = (1..1_000_000)\n    .asSequence()\n    .filter { it % 2 == 0 }\n    .map { it * 2 }\n    .take(10)\n    .toList()',
- 12, 16, 1, 'Kotlin Fundamentals', 4);
+ 12, 16, 1, 'Kotlin Fundamentals', 4)
+ON CONFLICT (id) DO UPDATE SET
+    title = EXCLUDED.title,
+    module = EXCLUDED.module,
+    difficulty = EXCLUDED.difficulty,
+    description = EXCLUDED.description,
+    kotlin_explanation = EXCLUDED.kotlin_explanation,
+    kotlin_code = EXCLUDED.kotlin_code,
+    reading_time_minutes = EXCLUDED.reading_time_minutes,
+    order_index = EXCLUDED.order_index,
+    part_number = EXCLUDED.part_number,
+    part_name = EXCLUDED.part_name,
+    max_tier_level = EXCLUDED.max_tier_level;
 
 -- =====================================================
 -- PART 2: OBJECT-ORIENTED KOTLIN (Topics 17-35)
@@ -195,7 +231,19 @@ VALUES
  'lazy, observable, and custom property delegates',
  'Delegated properties let you define reusable property behaviors.',
  E'val lazyValue: String by lazy {\n    println("Computed!")\n    "Hello"\n}\n\nvar observed: String by Delegates.observable("initial") { _, old, new ->\n    println("$old -> $new")\n}',
- 15, 30, 2, 'Object-Oriented Kotlin', 4);
+ 15, 30, 2, 'Object-Oriented Kotlin', 4)
+ON CONFLICT (id) DO UPDATE SET
+    title = EXCLUDED.title,
+    module = EXCLUDED.module,
+    difficulty = EXCLUDED.difficulty,
+    description = EXCLUDED.description,
+    kotlin_explanation = EXCLUDED.kotlin_explanation,
+    kotlin_code = EXCLUDED.kotlin_code,
+    reading_time_minutes = EXCLUDED.reading_time_minutes,
+    order_index = EXCLUDED.order_index,
+    part_number = EXCLUDED.part_number,
+    part_name = EXCLUDED.part_name,
+    max_tier_level = EXCLUDED.max_tier_level;
 
 -- =====================================================
 -- PART 3: FUNCTIONAL PROGRAMMING (Topics 31-45)
@@ -255,7 +303,19 @@ VALUES
  'Make objects callable like functions',
  'The invoke operator lets you call objects as if they were functions.',
  E'class Greeter(val greeting: String) {\n    operator fun invoke(name: String) = "$greeting, $name!"\n}\n\nval greet = Greeter("Hello")\nprintln(greet("World"))  // Hello, World!',
- 8, 39, 3, 'Functional Programming', 3);
+ 8, 39, 3, 'Functional Programming', 3)
+ON CONFLICT (id) DO UPDATE SET
+    title = EXCLUDED.title,
+    module = EXCLUDED.module,
+    difficulty = EXCLUDED.difficulty,
+    description = EXCLUDED.description,
+    kotlin_explanation = EXCLUDED.kotlin_explanation,
+    kotlin_code = EXCLUDED.kotlin_code,
+    reading_time_minutes = EXCLUDED.reading_time_minutes,
+    order_index = EXCLUDED.order_index,
+    part_number = EXCLUDED.part_number,
+    part_name = EXCLUDED.part_name,
+    max_tier_level = EXCLUDED.max_tier_level;
 
 -- =====================================================
 -- PART 4: ADVANCED FEATURES (Topics 40-65)
@@ -417,4 +477,16 @@ VALUES
  'Idiomatic Kotlin patterns and conventions',
  'Follow Kotlin conventions for clean, maintainable code.',
  E'// Prefer val over var\n// Use data classes for DTOs\n// Use sealed classes for restricted hierarchies\n// Prefer expressions over statements\n// Use scope functions appropriately\n// Avoid !! - use safe calls or elvis',
- 15, 65, 4, 'Advanced Features', 4);
+ 15, 65, 4, 'Advanced Features', 4)
+ON CONFLICT (id) DO UPDATE SET
+    title = EXCLUDED.title,
+    module = EXCLUDED.module,
+    difficulty = EXCLUDED.difficulty,
+    description = EXCLUDED.description,
+    kotlin_explanation = EXCLUDED.kotlin_explanation,
+    kotlin_code = EXCLUDED.kotlin_code,
+    reading_time_minutes = EXCLUDED.reading_time_minutes,
+    order_index = EXCLUDED.order_index,
+    part_number = EXCLUDED.part_number,
+    part_name = EXCLUDED.part_name,
+    max_tier_level = EXCLUDED.max_tier_level;

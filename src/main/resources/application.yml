@@ -16,6 +16,9 @@ spring:
     url: ${FLYWAY_URL:jdbc:postgresql://localhost:5433/personal}
     user: ${FLYWAY_USER:personal}
     password: ${FLYWAY_PASSWORD:personal}
+    default-schema: public
+    schemas: public
+    placeholder-replacement: false
   jackson:
     serialization:
       WRITE_DATES_AS_TIMESTAMPS: false
@@ -70,3 +73,9 @@ recaptcha:
   minimum-score: ${RECAPTCHA_MINIMUM_SCORE:0.5}
   expected-action: ${RECAPTCHA_EXPECTED_ACTION:contact_form}
   expected-hostname: ${RECAPTCHA_EXPECTED_HOSTNAME:}
+
+kotlin-playground:
+  enabled: ${KOTLIN_PLAYGROUND_ENABLED:true}
+  server-url: ${KOTLIN_PLAYGROUND_SERVER_URL:https://api.kotlinlang.org}
+  compiler-url: ${KOTLIN_PLAYGROUND_COMPILER_URL:https://api.kotlinlang.org/api/2.0.21/compiler/run}
+  timeout: ${KOTLIN_PLAYGROUND_TIMEOUT:30000}

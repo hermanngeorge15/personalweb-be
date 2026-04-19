@@ -29,6 +29,7 @@ class IntegrationFlywayTest {
     val flyway = Flyway.configure()
       .dataSource(jdbcUrl, postgres.username, postgres.password)
       .locations("classpath:db/migration")
+      .placeholderReplacement(false)
       .load()
     flyway.migrate()
 

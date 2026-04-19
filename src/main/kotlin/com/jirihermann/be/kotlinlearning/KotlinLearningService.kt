@@ -362,4 +362,229 @@ class KotlinLearningService(
             emptyList()
         }
     }
+
+    // =====================================================
+    // Admin Methods - Topics
+    // =====================================================
+
+    /**
+     * Get all topics for admin (includes raw data)
+     */
+    suspend fun listTopicsAdmin(): List<KotlinTopicAdminDto> = withTracing {
+        logger.info("Admin: Listing all Kotlin topics")
+        topicRepo.findAllOrderedByIndex().toList().map { it.toAdminDto() }
+    }
+
+    /**
+     * Get a single topic for admin editing
+     */
+    suspend fun getTopicAdmin(id: String): KotlinTopicAdminDto? = withTracing {
+        logger.info("Admin: Fetching topic for edit: {}", id)
+        topicRepo.findById(id)?.toAdminDto()
+    }
+
+    /**
+     * Create a new topic
+     */
+    suspend fun createTopic(req: KotlinTopicUpsertRequest): String = withTracing {
+        logger.info("Admin: Creating topic: {}", req.id)
+        val entity = KotlinTopicEntity(
+            id = req.id,
+            title = req.title,
+            module = req.module,
+            difficulty = req.difficulty,
+            description = req.description,
+            kotlin_explanation = req.kotlinExplanation,
+            kotlin_code = req.kotlinCode,
+            reading_time_minutes = req.readingTimeMinutes,
+            order_index = req.orderIndex,
+            part_number = req.partNumber,
+            part_name = req.partName,
+            content_structure = req.contentStructure,
+            max_tier_level = req.maxTierLevel
+        )
+        topicRepo.save(entity)
+        logger.info("Admin: Topic created: {}", req.id)
+        req.id
+    }
+
+    /**
+     * Update an existing topic
+     */
+    suspend fun updateTopic(id: String, req: KotlinTopicUpsertRequest) = withTracing {
+        logger.info("Admin: Updating topic: {}", id)
+        val existing = topicRepo.findById(id)
+            ?: throw IllegalArgumentException("Topic not found: $id")
+
+        val updated = existing.copy(
+            title = req.title,
+            module = req.module,
+            difficulty = req.difficulty,
+            description = req.description,
+            kotlin_explanation = req.kotlinExplanation,
+            kotlin_code = req.kotlinCode,
+            reading_time_minutes = req.readingTimeMinutes,
+            order_index = req.orderIndex,
+            part_number = req.partNumber,
+            part_name = req.partName,
+            content_structure = req.contentStructure,
+            max_tier_level = req.maxTierLevel,
+            updated_at = java.time.OffsetDateTime.now()
+        )
+        topicRepo.save(updated)
+        logger.info("Admin: Topic updated: {}", id)
+    }
+
+    /**
+     * Delete a topic
+     */
+    suspend fun deleteTopic(id: String) = withTracing {
+        logger.info("Admin: Deleting topic: {}", id)
+        topicRepo.deleteById(id)
+        logger.info("Admin: Topic deleted: {}", id)
+    }
+
+    // =====================================================
+    // Admin Methods - Expense Tracker Chapters
+    // =====================================================
+
+    /**
+     * Get all chapters for admin (includes raw data)
+     */
+    suspend fun listChaptersAdmin(): List<ExpenseTrackerChapterAdminDto> = withTracing {
+        logger.info("Admin: Listing all expense tracker chapters")
+        chapterRepo.findAllOrdered().toList().map { it.toAdminDto() }
+    }
+
+    /**
+     * Get a single chapter for admin editing
+     */
+    suspend fun getChapterAdmin(id: Int): ExpenseTrackerChapterAdminDto? = withTracing {
+        logger.info("Admin: Fetching chapter for edit: {}", id)
+        chapterRepo.findById(id)?.toAdminDto()
+    }
+
+    /**
+     * Create a new expense tracker chapter
+     */
+    suspend fun createChapter(req: ExpenseTrackerChapterUpsertRequest): Int = withTracing {
+        logger.info("Admin: Creating chapter: {}", req.chapterNumber)
+
+        // Calculate previous/next chapter numbers
+        val allChapters = chapterRepo.findAllOrdered().toList()
+        val previousChapter = allChapters.lastOrNull { it.chapter_number < req.chapterNumber }?.chapter_number
+        val nextChapter = allChapters.firstOrNull { it.chapter_number > req.chapterNumber }?.chapter_number
+
+        val entity = KotlinExpenseTrackerChapterEntity(
+            chapter_number = req.chapterNumber,
+            title = req.title,
+            description = req.description,
+            introduction = req.introduction,
+            implementation_steps = req.implementationSteps,
+            code_snippets = req.codeSnippets,
+            summary = req.summary,
+            difficulty = req.difficulty,
+            estimated_time_minutes = req.estimatedTimeMinutes,
+            previous_chapter = previousChapter,
+            next_chapter = nextChapter
+        )
+        val saved = chapterRepo.save(entity)
+
+        // Update adjacent chapters' navigation
+        if (previousChapter != null) {
+            val prevChapter = chapterRepo.findByChapterNumber(previousChapter)
+            if (prevChapter != null) {
+                chapterRepo.save(prevChapter.copy(next_chapter = req.chapterNumber))
+            }
+        }
+        if (nextChapter != null) {
+            val nextChapterEntity = chapterRepo.findByChapterNumber(nextChapter)
+            if (nextChapterEntity != null) {
+                chapterRepo.save(nextChapterEntity.copy(previous_chapter = req.chapterNumber))
+            }
+        }
+
+        logger.info("Admin: Chapter created: {}", saved.id)
+        saved.id!!
+    }
+
+    /**
+     * Update an existing expense tracker chapter
+     */
+    suspend fun updateChapter(id: Int, req: ExpenseTrackerChapterUpsertRequest) = withTracing {
+        logger.info("Admin: Updating chapter: {}", id)
+        val existing = chapterRepo.findById(id)
+            ?: throw IllegalArgumentException("Chapter not found: $id")
+
+        val updated = existing.copy(
+            chapter_number = req.chapterNumber,
+            title = req.title,
+            description = req.description,
+            introduction = req.introduction,
+            implementation_steps = req.implementationSteps,
+            code_snippets = req.codeSnippets,
+            summary = req.summary,
+            difficulty = req.difficulty,
+            estimated_time_minutes = req.estimatedTimeMinutes
+        )
+        chapterRepo.save(updated)
+        logger.info("Admin: Chapter updated: {}", id)
+    }
+
+    /**
+     * Delete an expense tracker chapter
+     */
+    suspend fun deleteChapter(id: Int) = withTracing {
+        logger.info("Admin: Deleting chapter: {}", id)
+        val chapter = chapterRepo.findById(id)
+        if (chapter != null) {
+            // Update adjacent chapters' navigation
+            if (chapter.previous_chapter != null) {
+                val prevChapter = chapterRepo.findByChapterNumber(chapter.previous_chapter)
+                if (prevChapter != null) {
+                    chapterRepo.save(prevChapter.copy(next_chapter = chapter.next_chapter))
+                }
+            }
+            if (chapter.next_chapter != null) {
+                val nextChapter = chapterRepo.findByChapterNumber(chapter.next_chapter)
+                if (nextChapter != null) {
+                    chapterRepo.save(nextChapter.copy(previous_chapter = chapter.previous_chapter))
+                }
+            }
+            chapterRepo.deleteById(id)
+        }
+        logger.info("Admin: Chapter deleted: {}", id)
+    }
+
+    // Admin DTO mapping extensions
+    private fun KotlinTopicEntity.toAdminDto() = KotlinTopicAdminDto(
+        id = id,
+        title = title,
+        module = module,
+        difficulty = difficulty,
+        description = description,
+        kotlinExplanation = kotlin_explanation,
+        kotlinCode = kotlin_code,
+        readingTimeMinutes = reading_time_minutes,
+        orderIndex = order_index,
+        partNumber = part_number,
+        partName = part_name,
+        contentStructure = content_structure,
+        maxTierLevel = max_tier_level
+    )
+
+    private fun KotlinExpenseTrackerChapterEntity.toAdminDto() = ExpenseTrackerChapterAdminDto(
+        id = id!!,
+        chapterNumber = chapter_number,
+        title = title,
+        description = description,
+        introduction = introduction,
+        implementationSteps = implementation_steps,
+        codeSnippets = code_snippets,
+        summary = summary,
+        difficulty = difficulty,
+        estimatedTimeMinutes = estimated_time_minutes,
+        previousChapter = previous_chapter,
+        nextChapter = next_chapter
+    )
 }
