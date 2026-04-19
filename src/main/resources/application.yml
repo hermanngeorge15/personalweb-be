@@ -82,3 +82,12 @@ kotlin-playground:
   server-url: ${KOTLIN_PLAYGROUND_SERVER_URL:https://api.kotlinlang.org}
   compiler-url: ${KOTLIN_PLAYGROUND_COMPILER_URL:https://api.kotlinlang.org/api/2.0.21/compiler/run}
   timeout: ${KOTLIN_PLAYGROUND_TIMEOUT:30000}
+
+media:
+  base-dir: ${MEDIA_BASE_DIR:/app/media}
+  max-upload-bytes: ${MEDIA_MAX_UPLOAD_BYTES:20971520}  # 20 MiB
+
+spring.webflux.multipart:
+  max-in-memory-size: 1MB
+  max-disk-usage-per-part: 25MB
+  max-parts: 10

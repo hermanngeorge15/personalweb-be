@@ -7,7 +7,9 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.core.env.Environment
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
+import com.jirihermann.be.auth.ApiKeyAuthFilter
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
+import org.springframework.security.config.web.server.SecurityWebFiltersOrder
 import org.springframework.security.config.web.server.ServerHttpSecurity
 import org.springframework.security.web.server.SecurityWebFilterChain
 import org.springframework.security.web.server.header.ReferrerPolicyServerHttpHeadersWriter
@@ -40,8 +42,11 @@ class SecurityConfig {
   private lateinit var environment: Environment
 
   @Bean
-  fun filterChain(http: ServerHttpSecurity): SecurityWebFilterChain =
+  fun filterChain(http: ServerHttpSecurity, apiKeyAuthFilter: ApiKeyAuthFilter): SecurityWebFilterChain =
     http
+      // Register API-key filter before the standard authentication stage
+      // so it can populate ReactiveSecurityContext before JWT resolution.
+      .addFilterAt(apiKeyAuthFilter, SecurityWebFiltersOrder.HTTP_BASIC)
       // CSRF disabled for stateless JWT API
       .csrf { it.disable() }
       
@@ -102,6 +107,9 @@ class SecurityConfig {
         exchanges.pathMatchers(HttpMethod.GET, "/api/version").permitAll()
         exchanges.pathMatchers(HttpMethod.GET, "/api/contact").permitAll()
         exchanges.pathMatchers(HttpMethod.GET, "/api/learn-kotlin/**").permitAll()
+
+        // Public media fetch (uploads served from /api/media/files/**)
+        exchanges.pathMatchers(HttpMethod.GET, "/api/media/files/**").permitAll()
 
         // CV generation endpoints (must be before /api/**)
         exchanges.pathMatchers("/api/cv/**").permitAll()
@@ -177,7 +185,8 @@ class SecurityConfig {
       "Access-Control-Request-Method",
       "Access-Control-Request-Headers",
       "X-Trace-Id",
-      "X-Span-Id"
+      "X-Span-Id",
+      "X-API-Key"
     )
     
     // Expose headers that frontend needs to read
