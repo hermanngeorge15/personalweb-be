@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>reCAPTCHA v3 Test</title>
+    <!-- reCAPTCHA v3 Site Key -->
+    <script src="https://www.google.com/recaptcha/api.js?render=6Lf13OgrAAAAADAcXUj5ygbTAPIYH6VyfW7rFglX"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-top: 0;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #28a745;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+            display: none;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #dc3545;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+            display: none;
+        }
+        form {
+            margin-top: 20px;
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        button {
+            margin-top: 20px;
+            padding: 12px 30px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .code {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            margin-top: 10px;
+        }
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #17a2b8;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+        .steps {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+        .steps ol {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .steps li {
+            margin: 8px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 reCAPTCHA v3 Test Page</h1>
+        
+        <div class="warning">
+            <strong>⚠️ Before Testing:</strong>
+            <ol>
+                <li>Replace <code>YOUR_SITE_KEY_HERE</code> in the script tag above with your actual <strong>Site Key</strong></li>
+                <li>Make sure your backend is running: <code>./gradlew bootRun</code></li>
+                <li>The Site Key must match the Secret Key in your backend!</li>
+            </ol>
+        </div>
+
+        <div class="steps">
+            <strong>📋 Setup Steps:</strong>
+            <ol>
+                <li>Go to <a href="https://www.google.com/recaptcha/admin" target="_blank">Google reCAPTCHA Admin</a></li>
+                <li>Find your reCAPTCHA v3 site (or create one)</li>
+                <li>Copy the <strong>Site Key</strong> and replace it in this file's script tag</li>
+                <li>Copy the <strong>Secret Key</strong> and set it in your backend:
+                    <div class="code">export RECAPTCHA_SECRET_KEY='your-secret-key'</div>
+                </li>
+                <li>Restart your backend server</li>
+                <li>Open this file in a browser and test!</li>
+            </ol>
+        </div>
+
+        <form id="contactForm">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required value="Test User">
+
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required value="test@example.com">
+
+            <label for="message">Message:</label>
+            <textarea id="message" name="message" required>This is a test message to verify reCAPTCHA v3 integration.</textarea>
+
+            <button type="submit">Submit with reCAPTCHA</button>
+        </form>
+
+        <div class="success" id="successMsg">
+            <strong>✅ Success!</strong>
+            <p>Form submitted successfully. Check the details below.</p>
+            <div id="successDetails"></div>
+        </div>
+
+        <div class="error" id="errorMsg">
+            <strong>❌ Error!</strong>
+            <p id="errorDetails"></p>
+        </div>
+
+        <div class="info" id="infoBox" style="display: none;">
+            <strong>📊 Test Results:</strong>
+            <div id="testResults"></div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const SITE_KEY = '6Lf13OgrAAAAADAcXUj5ygbTAPIYH6VyfW7rFglX';  // Your Site Key
+        const BACKEND_URL = 'http://localhost:8891/api/contact';
+
+        // Form submission handler
+        document.getElementById('contactForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const submitButton = e.target.querySelector('button');
+            const successMsg = document.getElementById('successMsg');
+            const errorMsg = document.getElementById('errorMsg');
+            const infoBox = document.getElementById('infoBox');
+            
+            // Hide previous messages
+            successMsg.style.display = 'none';
+            errorMsg.style.display = 'none';
+            infoBox.style.display = 'none';
+            
+            // Disable submit button
+            submitButton.disabled = true;
+            submitButton.textContent = 'Processing...';
+
+            try {
+                // Step 1: Execute reCAPTCHA
+                console.log('🔐 Executing reCAPTCHA...');
+                console.log('Site Key:', SITE_KEY);
+                
+                const token = await grecaptcha.execute(SITE_KEY, { action: 'submit' });
+                console.log('✅ Token received:', token.substring(0, 50) + '...');
+
+                // Step 2: Prepare form data
+                const formData = {
+                    name: document.getElementById('name').value,
+                    email: document.getElementById('email').value,
+                    message: document.getElementById('message').value,
+                    recaptchaToken: token
+                };
+
+                console.log('📤 Sending to backend:', BACKEND_URL);
+                console.log('Form data:', { ...formData, recaptchaToken: formData.recaptchaToken.substring(0, 50) + '...' });
+
+                // Step 3: Send to backend
+                const response = await fetch(BACKEND_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData),
+                });
+
+                console.log('📥 Response status:', response.status);
+
+                // Step 4: Handle response
+                if (response.ok) {
+                    console.log('✅ Success!');
+                    successMsg.style.display = 'block';
+                    document.getElementById('successDetails').innerHTML = `
+                        <div class="code">
+                            <strong>Request Details:</strong><br>
+                            Site Key: ${SITE_KEY}<br>
+                            Token (first 50 chars): ${token.substring(0, 50)}...<br>
+                            Backend URL: ${BACKEND_URL}<br>
+                            Status: ${response.status} ${response.statusText}
+                        </div>
+                    `;
+                    
+                    // Show info box
+                    infoBox.style.display = 'block';
+                    document.getElementById('testResults').innerHTML = `
+                        <div class="code">
+                            ✅ reCAPTCHA v3 is working correctly!<br><br>
+                            <strong>What happened:</strong><br>
+                            1. Frontend generated a token using Site Key<br>
+                            2. Token was sent to backend<br>
+                            3. Backend verified with Google using Secret Key<br>
+                            4. Verification passed!<br><br>
+                            <strong>Check backend logs:</strong><br>
+                            tail -f logs/be.log | grep -i recaptcha
+                        </div>
+                    `;
+                    
+                    // Reset form
+                    document.getElementById('contactForm').reset();
+                } else {
+                    const errorText = await response.text();
+                    console.error('❌ Error:', errorText);
+                    
+                    errorMsg.style.display = 'block';
+                    
+                    if (response.status === 400 && errorText.includes('CAPTCHA verification failed')) {
+                        document.getElementById('errorDetails').innerHTML = `
+                            <strong>CAPTCHA verification failed</strong><br><br>
+                            This usually means:<br>
+                            1. Your Site Key (frontend) and Secret Key (backend) don't match<br>
+                            2. They are from different reCAPTCHA sites<br><br>
+                            <strong>How to fix:</strong><br>
+                            1. Go to <a href="https://www.google.com/recaptcha/admin" target="_blank">reCAPTCHA Admin</a><br>
+                            2. Find your site<br>
+                            3. Copy BOTH keys from the SAME site<br>
+                            4. Update frontend Site Key and backend Secret Key<br>
+                            5. Restart backend and try again<br><br>
+                            <strong>Check backend logs for details:</strong>
+                            <div class="code">tail -f logs/be.log | grep -i recaptcha</div>
+                        `;
+                    } else {
+                        document.getElementById('errorDetails').innerHTML = `
+                            Status: ${response.status}<br>
+                            Error: ${errorText}<br><br>
+                            <strong>Check backend logs:</strong>
+                            <div class="code">tail -f logs/be.log</div>
+                        `;
+                    }
+                }
+            } catch (error) {
+                console.error('❌ Exception:', error);
+                errorMsg.style.display = 'block';
+                document.getElementById('errorDetails').innerHTML = `
+                    ${error.message}<br><br>
+                    <strong>Troubleshooting:</strong><br>
+                    1. Make sure you replaced YOUR_SITE_KEY_HERE with your actual Site Key<br>
+                    2. Check that your backend is running on port 8891<br>
+                    3. Open browser console for more details (F12)<br>
+                    4. Check backend logs: <code>tail -f logs/be.log</code>
+                `;
+            } finally {
+                // Re-enable submit button
+                submitButton.disabled = false;
+                submitButton.textContent = 'Submit with reCAPTCHA';
+            }
+        });
+
+        // Check if reCAPTCHA is loaded
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                if (typeof grecaptcha !== 'undefined') {
+                    console.log('✅ reCAPTCHA script loaded successfully');
+                    console.log('Site Key:', SITE_KEY);
+                } else {
+                    console.error('❌ reCAPTCHA script failed to load');
+                    document.getElementById('errorMsg').style.display = 'block';
+                    document.getElementById('errorDetails').innerHTML = 'Failed to load reCAPTCHA script. Check your Site Key.';
+                }
+            }, 1000);
+        });
+
+        console.log('📋 reCAPTCHA Test Page Loaded');
+        console.log('Site Key:', SITE_KEY);
+        console.log('Backend URL:', BACKEND_URL);
+    </script>
+</body>
+</html>
+
