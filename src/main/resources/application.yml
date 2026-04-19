@@ -42,11 +42,9 @@ management:
       enabled: true
     health:
       show-details: when-authorized
-      probes:
-        enabled: true
-      group:
-        readiness:
-          include: readinessState, db
+  health:
+    redis:
+      enabled: false
   metrics:
     export:
       prometheus:
