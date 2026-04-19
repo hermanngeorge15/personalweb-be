@@ -142,7 +142,7 @@ jobs:
             sleep 15
             
             echo "Running health check..."
-            if curl -f http://localhost:8891/actuator/health; then
+            if curl -f http://localhost:8891/actuator/health/readiness; then
               echo "✅ Deployment successful! Service is healthy."
             else
               echo "❌ Health check failed!"
