@@ -20,3 +20,4 @@ local.properties
 /docs/*
 /src/main/resources/application-prod.yml
 /scripts/*
+!/scripts/mint-api-key.sh

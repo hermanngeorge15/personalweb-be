@@ -44,6 +44,16 @@ class PostController(private val service: PostService) {
   @Operation(summary = "Update post", security = [SecurityRequirement(name = "bearer-jwt")])
   suspend fun update(@PathVariable id: UUID, @RequestBody body: PostService.PostUpsertRequest) = service.update(id, body)
 
+  @PutMapping("/by-slug/{slug}")
+  @Operation(
+    summary = "Upsert post by slug (admin). Creates on missing, replaces on existing.",
+    security = [SecurityRequirement(name = "bearer-jwt")]
+  )
+  suspend fun upsertBySlug(
+    @PathVariable slug: String,
+    @RequestBody body: PostService.PostUpsertRequest,
+  ): PostService.UpsertResult = service.upsertBySlug(slug, body)
+
   @DeleteMapping("/{id}")
   @Operation(summary = "Delete post", security = [SecurityRequirement(name = "bearer-jwt")])
   @ResponseStatus(HttpStatus.NO_CONTENT)

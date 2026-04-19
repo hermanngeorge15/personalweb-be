@@ -76,6 +76,44 @@ class PostService(private val repo: PostRepo) {
     saved.id!!
   }
 
+  suspend fun upsertBySlug(slug: String, req: PostUpsertRequest): UpsertResult = withTracing {
+    logger.info("Upserting post by slug: {}", slug)
+    val existing = repo.findBySlug(slug)
+    if (existing == null) {
+      val saved = repo.save(
+        PostEntity(
+          slug = req.slug,
+          title = req.title,
+          excerpt = req.excerpt,
+          content_mdx = req.content_mdx,
+          cover_url = req.cover_url,
+          tags = req.tags,
+          status = req.status,
+          published_at = req.published_at
+        )
+      )
+      logger.info("Post created via upsert: id={}, slug={}", saved.id, saved.slug)
+      UpsertResult(id = saved.id!!, slug = saved.slug, created = true)
+    } else {
+      repo.save(
+        existing.copy(
+          slug = req.slug,
+          title = req.title,
+          excerpt = req.excerpt,
+          content_mdx = req.content_mdx,
+          cover_url = req.cover_url,
+          tags = req.tags,
+          status = req.status,
+          published_at = req.published_at
+        )
+      )
+      logger.info("Post updated via upsert: id={}, slug={}", existing.id, req.slug)
+      UpsertResult(id = existing.id!!, slug = req.slug, created = false)
+    }
+  }
+
+  data class UpsertResult(val id: UUID, val slug: String, val created: Boolean)
+
   suspend fun update(id: UUID, req: PostUpsertRequest): Unit = withTracing {
     logger.info("Updating post: id={}, slug={}, status={}", id, req.slug, req.status)
     val current = repo.findById(id)
