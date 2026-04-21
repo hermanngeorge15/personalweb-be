@@ -11,7 +11,6 @@ import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.server.WebFilter
 import org.springframework.web.server.WebFilterChain
 import reactor.core.publisher.Mono
-import java.security.MessageDigest
 
 /**
  * Resolves X-API-Key headers into a ROLE_ADMIN-bearing Authentication so
@@ -41,7 +40,7 @@ class ApiKeyAuthFilter(
       return chain.filter(exchange)
     }
     val publicId = parts[0]
-    val secretHash = sha256(parts[1])
+    val secretHash = sha256Hex(parts[1])
 
     return mono { apiKeyRepo.findActiveByPublicId(publicId) }
       .flatMap { entity ->
@@ -70,12 +69,6 @@ class ApiKeyAuthFilter(
 
   companion object {
     const val HEADER = "X-API-Key"
-
-    private fun sha256(input: String): String {
-      val md = MessageDigest.getInstance("SHA-256")
-      val bytes = md.digest(input.toByteArray(Charsets.UTF_8))
-      return bytes.joinToString("") { "%02x".format(it) }
-    }
 
     private fun constantTimeEquals(a: String, b: String): Boolean {
       if (a.length != b.length) return false

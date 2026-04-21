@@ -26,22 +26,13 @@ NOT NULL`) are ignored. On match, the filter populates the reactive security
 context with the key's roles (default: `ROLE_ADMIN`) and proceeds; the JWT
 filter then no-ops because an authentication is already present.
 
-Minting (operator on the prod host):
+Minting is done over HTTP against `/api/admin/api-keys` — see §6. The shell
+script `scripts/mint-api-key.sh` remains as a fallback for bootstrap scenarios
+where no admin JWT is available yet, but the HTTP endpoint is preferred.
 
-```bash
-export DATABASE_URL="postgresql://…"
-./scripts/mint-api-key.sh "publish-pipeline"
-# prints the full key exactly once — store it in your secrets manager
-```
-
-The plaintext key is **never** returned by any endpoint; only the SHA-256
-of the secret is stored. If lost, revoke + mint a new one.
-
-Revoking:
-
-```sql
-UPDATE api_keys SET revoked_at = now() WHERE name = 'publish-pipeline';
-```
+The plaintext key is returned exactly once on creation and is **never**
+returned by any subsequent endpoint; only the SHA-256 of the secret is stored.
+If lost, revoke + mint a new one.
 
 ## 2. Posts
 
@@ -150,7 +141,69 @@ jq --arg cover "$GIF_URL" \
     --data @-
 ```
 
-## 5. Operational notes
+## 6. Admin: API keys
+
+All endpoints below require a Keycloak JWT with `ROLE_ADMIN`. API-key auth is
+deliberately **not** accepted here — a compromised key should not be able to
+mint more keys.
+
+### 6.1 `POST /api/admin/api-keys`
+
+Mint a new key. The plaintext is returned once in the `key` field — save it
+immediately; it cannot be recovered.
+
+Body:
+
+```json
+{
+  "name": "my-laptop",
+  "roles": ["ADMIN"]          // optional, defaults to ["ADMIN"]
+}
+```
+
+Response `201 Created`:
+
+```json
+{
+  "id": "…uuid…",
+  "public_id": "…",
+  "key": "<public_id>.<secret>",
+  "name": "my-laptop",
+  "roles": ["ADMIN"],
+  "created_at": "2026-04-21T…"
+}
+```
+
+### 6.2 `GET /api/admin/api-keys`
+
+Lists keys (all of them, including revoked — use `revoked_at` to filter).
+Never returns `key_hash` or any plaintext.
+
+### 6.3 `DELETE /api/admin/api-keys/{id}`
+
+Revokes a key. Idempotent — returns `204 No Content` whether the key was
+active or already revoked.
+
+### 6.4 Example flow
+
+```bash
+TOKEN=$(curl -sf -X POST https://keycloak…/realms/personalblog/protocol/openid-connect/token \
+  -d grant_type=password -d client_id=<c> -d username=<u> -d password=<p> | jq -r .access_token)
+
+# Mint
+curl -sf -X POST https://jirihermann.com/api/admin/api-keys \
+  -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  -d '{"name":"my-laptop"}' | jq .
+# Save the returned "key" field.
+
+# List
+curl -sf https://jirihermann.com/api/admin/api-keys -H "Authorization: Bearer $TOKEN" | jq .
+
+# Revoke
+curl -sf -X DELETE https://jirihermann.com/api/admin/api-keys/<id> -H "Authorization: Bearer $TOKEN"
+```
+
+## 7. Operational notes
 
 - Uploaded media lives on the container filesystem at `MEDIA_BASE_DIR`
   (default `/app/media`). In prod, mount a host volume to survive image
