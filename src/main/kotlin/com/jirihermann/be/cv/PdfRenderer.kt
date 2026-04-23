@@ -1,5 +1,6 @@
 package com.jirihermann.be.cv
 
+import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.jirihermann.be.meta.MetaService
 import com.jirihermann.be.resume.ResumeService
@@ -50,7 +51,7 @@ class PdfRenderer(
 
     // Parse socials json (may be empty)
     val socials: Map<String, Any?> = try {
-      meta?.socials?.let { objectMapper.readValue(it, Map::class.java) as Map<String, Any?> } ?: emptyMap()
+      meta?.socials?.let { objectMapper.readValue(it, object : TypeReference<Map<String, Any?>>() {}) } ?: emptyMap()
     } catch (_: Exception) { emptyMap() }
 
     // Build a simple skills grouping (optional; safe defaults)
