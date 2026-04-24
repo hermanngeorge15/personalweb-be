@@ -36,8 +36,11 @@ class PostService(private val repo: PostRepo) {
       PostDetailDto(
         slug = it.slug,
         title = it.title,
+        excerpt = it.excerpt,
         content_mdx = it.content_mdx,
+        cover_url = it.cover_url,
         tags = it.tags,
+        status = it.status,
         published_at = it.published_at
       )
     } ?: run {

@@ -14,8 +14,11 @@ data class PostListItemDto(
 data class PostDetailDto(
   val slug: String,
   val title: String,
+  val excerpt: String,
   val content_mdx: String,
+  val cover_url: String?,
   val tags: List<String>,
+  val status: String,
   val published_at: OffsetDateTime?
 )
 
