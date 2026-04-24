@@ -48,6 +48,25 @@ class PostServiceTest {
     assertEquals("hello", dto.slug)
     assertEquals("Hello", dto.title)
   }
+
+  @Test
+  fun getBySlug_includes_excerpt_cover_and_status() = runTest {
+    val entity = PostEntity(
+      slug = "rich",
+      title = "Rich",
+      excerpt = "An excerpt that matters for the post card.",
+      content_mdx = "# body",
+      cover_url = "/api/media/files/abc.gif",
+      tags = listOf("ai"),
+      status = "draft",
+      published_at = null
+    )
+    coEvery { repo.findBySlug("rich") } returns entity
+    val dto = service.getBySlug("rich")!!
+    assertEquals("An excerpt that matters for the post card.", dto.excerpt)
+    assertEquals("/api/media/files/abc.gif", dto.cover_url)
+    assertEquals("draft", dto.status)
+  }
 }
 
 
