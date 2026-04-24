@@ -17,6 +17,26 @@ Interactive users. Frontend logs in via Keycloak at
 is a standard OIDC JWT; Spring maps realm/client roles to
 `ROLE_<UPPERCASE_ROLE>`.
 
+**Service accounts (machines)** use the client-credentials grant against the
+same realm. The `personalblog-publisher` client has the `publisher` realm role
+and is limited to the endpoints listed in §1.3.
+
+```bash
+TOKEN=$(curl -sf -X POST \
+  https://keycloak.kotlinserversquad.com/realms/personalblog/protocol/openid-connect/token \
+  -d grant_type=client_credentials \
+  -d client_id=personalblog-publisher \
+  -d client_secret="$CLIENT_SECRET" | jq -r .access_token)
+```
+
+### 1.3 Role matrix
+
+| Role | May do |
+|---|---|
+| *(anonymous)* | Public GETs (§2.1, §2.2, §3.2, meta, projects, resume, testimonials, learn-kotlin) and `POST /api/contact`. |
+| `ROLE_PUBLISHER` | `POST /api/posts`, `PUT /api/posts/**`, `POST /api/media`. Nothing else. |
+| `ROLE_ADMIN` | Everything. |
+
 ### 1.2 API key (`X-API-Key: <public_id>.<secret>`)
 
 Machine clients. A key is a `"<public_id>.<secret>"` string. The backend

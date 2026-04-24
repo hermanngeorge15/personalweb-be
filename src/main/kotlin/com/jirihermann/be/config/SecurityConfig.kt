@@ -120,7 +120,13 @@ class SecurityConfig {
         // Admin-only contact endpoints
 //        exchanges.pathMatchers(HttpMethod.GET, "/api/contact").hasRole("ADMIN")
 //        exchanges.pathMatchers(HttpMethod.POST, "/api/contact/*/handle").hasRole("ADMIN")
-        
+
+        // Publisher (or admin) — create/update posts and upload media.
+        // Must come BEFORE the generic /api/** rule so it wins the match.
+        exchanges.pathMatchers(HttpMethod.POST, "/api/posts").hasAnyRole("ADMIN", "PUBLISHER")
+        exchanges.pathMatchers(HttpMethod.PUT, "/api/posts/**").hasAnyRole("ADMIN", "PUBLISHER")
+        exchanges.pathMatchers(HttpMethod.POST, "/api/media").hasAnyRole("ADMIN", "PUBLISHER")
+
         // All other /api/** endpoints require ADMIN role (POST, PUT, PATCH, DELETE)
         exchanges.pathMatchers("/api/**").hasRole("ADMIN")
         
