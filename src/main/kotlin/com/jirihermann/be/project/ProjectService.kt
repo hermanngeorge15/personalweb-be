@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service
 import java.util.UUID
 
 data class ProjectDto(
+  val id: UUID?,
   val slug: String,
   val title: String,
   val summary: String,
@@ -22,6 +23,7 @@ class ProjectService(private val repo: ProjectRepo) {
     logger.info("Listing projects")
     val projects = repo.listOrdered().map {
       ProjectDto(
+        id = it.id,
         slug = it.slug,
         title = it.title,
         summary = it.summary,
@@ -40,8 +42,8 @@ class ProjectService(private val repo: ProjectRepo) {
     val title: String,
     val summary: String,
     val content_mdx: String,
-    val links: String,
-    val order: Int
+    val links: String = "{}",
+    val order: Int = 0
   )
 
   suspend fun create(req: ProjectUpsertRequest): UUID = withTracing {

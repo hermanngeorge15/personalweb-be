@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service
 import java.util.UUID
 
 data class TestimonialDto(
+  val id: UUID?,
   val author: String,
   val role: String,
   val avatar_url: String?,
@@ -21,6 +22,7 @@ class TestimonialService(private val repo: TestimonialRepo) {
     logger.info("Listing testimonials")
     val testimonials = repo.listOrdered().map {
       TestimonialDto(
+        id = it.id,
         author = it.author,
         role = it.role,
         avatar_url = it.avatar_url,
@@ -38,7 +40,7 @@ class TestimonialService(private val repo: TestimonialRepo) {
     val role: String,
     val avatar_url: String?,
     val quote: String,
-    val order: Int
+    val order: Int = 0
   )
 
   suspend fun create(req: TestimonialUpsertRequest): UUID = withTracing {
