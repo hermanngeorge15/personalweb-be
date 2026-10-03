@@ -105,7 +105,6 @@ class SecurityConfig {
         exchanges.pathMatchers(HttpMethod.GET, "/api/resume/**").permitAll()
         exchanges.pathMatchers(HttpMethod.GET, "/api/meta").permitAll()
         exchanges.pathMatchers(HttpMethod.GET, "/api/version").permitAll()
-        exchanges.pathMatchers(HttpMethod.GET, "/api/contact").permitAll()
         exchanges.pathMatchers(HttpMethod.GET, "/api/learn-kotlin/**").permitAll()
 
         // Public media fetch (uploads served from /api/media/files/**)
@@ -117,9 +116,8 @@ class SecurityConfig {
         // Public POST endpoints (must be before /api/**)
         exchanges.pathMatchers(HttpMethod.POST, "/api/contact").permitAll()
         
-        // Admin-only contact endpoints
-//        exchanges.pathMatchers(HttpMethod.GET, "/api/contact").hasRole("ADMIN")
-//        exchanges.pathMatchers(HttpMethod.POST, "/api/contact/*/handle").hasRole("ADMIN")
+        // Contact messages (GET /api/contact, POST /api/contact/{id}:handle) hold visitors'
+        // names, emails and messages: they fall through to the ADMIN-only /api/** rule below.
 
         // Publisher (or admin) — create/update posts and upload media.
         // Must come BEFORE the generic /api/** rule so it wins the match.
