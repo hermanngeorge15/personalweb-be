@@ -2,6 +2,8 @@ package com.jirihermann.be.kotlinlearning
 
 import com.jirihermann.be.tracing.withTracing
 import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.reactor.awaitSingle
+import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -15,7 +17,8 @@ class KotlinLearningService(
     private val contentTierRepo: KotlinContentTierRepo,
     private val runnableExampleRepo: KotlinRunnableExampleRepo,
     private val chapterRepo: KotlinExpenseTrackerChapterRepo,
-    private val topicChapterLinkRepo: KotlinTopicChapterLinkRepo
+    private val topicChapterLinkRepo: KotlinTopicChapterLinkRepo,
+    private val template: R2dbcEntityTemplate
 ) {
     private val logger = LoggerFactory.getLogger(KotlinLearningService::class.java)
 
@@ -403,7 +406,9 @@ class KotlinLearningService(
             content_structure = req.contentStructure,
             max_tier_level = req.maxTierLevel
         )
-        topicRepo.save(entity)
+        // The id is chosen by the admin, so save() would treat this as an existing row and
+        // issue an UPDATE that matches nothing. A new topic needs an explicit INSERT.
+        template.insert(entity).awaitSingle()
         logger.info("Admin: Topic created: {}", req.id)
         req.id
     }
