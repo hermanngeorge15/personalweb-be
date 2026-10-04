@@ -45,36 +45,17 @@ class TestimonialService(private val repo: TestimonialRepo) {
 
   suspend fun create(req: TestimonialUpsertRequest): UUID = withTracing {
     logger.info("Creating testimonial: author={}", req.author)
-    val saved = repo.save(
-      TestimonialEntity(
-        author = req.author,
-        role = req.role,
-        avatar_url = req.avatar_url,
-        quote = req.quote,
-        order = req.order
-      )
-    )
-    logger.info("Testimonial created: id={}, author={}", saved.id, saved.author)
-    saved.id!!
+    val id = repo.insert(req.author, req.role, req.avatar_url, req.quote, req.order)
+    logger.info("Testimonial created: id={}, author={}", id, req.author)
+    id
   }
 
-  suspend fun update(id: UUID, req: TestimonialUpsertRequest): Unit = withTracing {
+  /** Replaces the testimonial with [id]. Returns false when no such testimonial exists. */
+  suspend fun update(id: UUID, req: TestimonialUpsertRequest): Boolean = withTracing {
     logger.info("Updating testimonial: id={}, author={}", id, req.author)
-    val current = repo.findById(id)
-    if (current == null) {
-      logger.warn("Testimonial not found for update: id={}", id)
-      return@withTracing
-    }
-    repo.save(
-      current.copy(
-        author = req.author,
-        role = req.role,
-        avatar_url = req.avatar_url,
-        quote = req.quote,
-        order = req.order
-      )
-    )
-    logger.info("Testimonial updated: id={}, author={}", id, req.author)
+    val updated = repo.update(id, req.author, req.role, req.avatar_url, req.quote, req.order) > 0
+    if (!updated) logger.warn("Testimonial not found for update: id={}", id)
+    updated
   }
 
   suspend fun delete(id: UUID): Unit = withTracing {
