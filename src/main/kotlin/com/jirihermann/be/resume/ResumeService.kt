@@ -98,12 +98,13 @@ class ResumeService(
     saved.id!!
   }
   
-  suspend fun updateProject(id: UUID, req: ProjectUpsertRequest): Unit = withTracing {
+  /** Returns false when no resume project has this id. */
+  suspend fun updateProject(id: UUID, req: ProjectUpsertRequest): Boolean = withTracing {
     logger.info("Updating resume project: id={}", id)
     val current = projectRepo.findById(id)
     if (current == null) {
       logger.warn("Resume project not found for update: id={}", id)
-      return@withTracing
+      return@withTracing false
     }
     projectRepo.save(
       current.copy(
@@ -119,6 +120,7 @@ class ResumeService(
       )
     )
     logger.info("Resume project updated: id={}", id)
+    true
   }
   
   suspend fun deleteProject(id: UUID): Unit = withTracing {
@@ -165,8 +167,9 @@ class ResumeService(
         url = req.url
       )
     ).id!!
-  suspend fun updateCertificate(id: UUID, req: CertificateUpsertRequest) {
-    val current = certificateRepo.findById(id) ?: return
+  /** Returns false when no certificate has this id. */
+  suspend fun updateCertificate(id: UUID, req: CertificateUpsertRequest): Boolean {
+    val current = certificateRepo.findById(id) ?: return false
     certificateRepo.save(
       current.copy(
         name = req.name,
@@ -178,6 +181,7 @@ class ResumeService(
         url = req.url
       )
     )
+    return true
   }
   suspend fun deleteCertificate(id: UUID) = certificateRepo.deleteById(id)
 
@@ -201,8 +205,9 @@ class ResumeService(
         status = req.status
       )
     ).id!!
-  suspend fun updateEducation(id: UUID, req: EducationUpsertRequest) {
-    val current = educationRepo.findById(id) ?: return
+  /** Returns false when no education entry has this id. */
+  suspend fun updateEducation(id: UUID, req: EducationUpsertRequest): Boolean {
+    val current = educationRepo.findById(id) ?: return false
     educationRepo.save(
       current.copy(
         institution = req.institution,
@@ -215,6 +220,7 @@ class ResumeService(
         status = req.status
       )
     )
+    return true
   }
   suspend fun deleteEducation(id: UUID) = educationRepo.deleteById(id)
 
@@ -232,15 +238,17 @@ class ResumeService(
     saved.id!!
   }
 
-  suspend fun updateLanguage(id: UUID, req: LanguageUpsertRequest): Unit = withTracing {
+  /** Returns false when no language has this id. */
+  suspend fun updateLanguage(id: UUID, req: LanguageUpsertRequest): Boolean = withTracing {
     logger.info("Updating language: id={}", id)
     val current = languageRepo.findById(id)
     if (current == null) {
       logger.warn("Language not found for update: id={}", id)
-      return@withTracing
+      return@withTracing false
     }
     languageRepo.save(current.copy(name = req.name, level = req.level))
     logger.info("Language updated: id={}", id)
+    true
   }
 
   suspend fun deleteLanguage(id: UUID): Unit = withTracing {

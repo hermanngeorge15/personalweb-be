@@ -1,5 +1,6 @@
 package com.jirihermann.be.testimonial
 
+import org.springframework.web.server.ResponseStatusException
 import java.util.UUID
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -31,7 +32,9 @@ class TestimonialController(private val service: TestimonialService) {
 
   @PutMapping("/{id}")
   @Operation(summary = "Update testimonial", security = [SecurityRequirement(name = "bearer-jwt")])
-  suspend fun update(@PathVariable id: UUID, @RequestBody body: TestimonialService.TestimonialUpsertRequest) = service.update(id, body)
+  suspend fun update(@PathVariable id: UUID, @RequestBody body: TestimonialService.TestimonialUpsertRequest) {
+    if (!service.update(id, body)) throw ResponseStatusException(HttpStatus.NOT_FOUND)
+  }
 
   @DeleteMapping("/{id}")
   @Operation(summary = "Delete testimonial", security = [SecurityRequirement(name = "bearer-jwt")])

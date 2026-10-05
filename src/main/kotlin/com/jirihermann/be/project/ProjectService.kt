@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service
 import java.util.UUID
 
 data class ProjectDto(
+  val id: UUID?,
   val slug: String,
   val title: String,
   val summary: String,
@@ -22,6 +23,7 @@ class ProjectService(private val repo: ProjectRepo) {
     logger.info("Listing projects")
     val projects = repo.listOrdered().map {
       ProjectDto(
+        id = it.id,
         slug = it.slug,
         title = it.title,
         summary = it.summary,
@@ -40,44 +42,23 @@ class ProjectService(private val repo: ProjectRepo) {
     val title: String,
     val summary: String,
     val content_mdx: String,
-    val links: String,
-    val order: Int
+    val links: String = "{}",
+    val order: Int = 0
   )
 
   suspend fun create(req: ProjectUpsertRequest): UUID = withTracing {
     logger.info("Creating project: slug={}, title={}", req.slug, req.title)
-    val saved = repo.save(
-      ProjectEntity(
-        slug = req.slug,
-        title = req.title,
-        summary = req.summary,
-        content_mdx = req.content_mdx,
-        links = req.links,
-        order = req.order
-      )
-    )
-    logger.info("Project created: id={}, slug={}", saved.id, saved.slug)
-    saved.id!!
+    val id = repo.insert(req.slug, req.title, req.summary, req.content_mdx, req.links, req.order)
+    logger.info("Project created: id={}, slug={}", id, req.slug)
+    id
   }
 
-  suspend fun update(id: UUID, req: ProjectUpsertRequest): Unit = withTracing {
+  /** Replaces the project with [id]. Returns false when no such project exists. */
+  suspend fun update(id: UUID, req: ProjectUpsertRequest): Boolean = withTracing {
     logger.info("Updating project: id={}, slug={}", id, req.slug)
-    val current = repo.findById(id)
-    if (current == null) {
-      logger.warn("Project not found for update: id={}", id)
-      return@withTracing
-    }
-    repo.save(
-      current.copy(
-        slug = req.slug,
-        title = req.title,
-        summary = req.summary,
-        content_mdx = req.content_mdx,
-        links = req.links,
-        order = req.order
-      )
-    )
-    logger.info("Project updated: id={}, slug={}", id, req.slug)
+    val updated = repo.update(id, req.slug, req.title, req.summary, req.content_mdx, req.links, req.order) > 0
+    if (!updated) logger.warn("Project not found for update: id={}", id)
+    updated
   }
 
   suspend fun delete(id: UUID): Unit = withTracing {

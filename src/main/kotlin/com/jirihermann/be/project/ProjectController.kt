@@ -1,5 +1,6 @@
 package com.jirihermann.be.project
 
+import org.springframework.web.server.ResponseStatusException
 import java.util.UUID
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -31,7 +32,9 @@ class ProjectController(private val service: ProjectService) {
 
   @PutMapping("/{id}")
   @Operation(summary = "Update project", security = [SecurityRequirement(name = "bearer-jwt")])
-  suspend fun update(@PathVariable id: UUID, @RequestBody body: ProjectService.ProjectUpsertRequest) = service.update(id, body)
+  suspend fun update(@PathVariable id: UUID, @RequestBody body: ProjectService.ProjectUpsertRequest) {
+    if (!service.update(id, body)) throw ResponseStatusException(HttpStatus.NOT_FOUND)
+  }
 
   @DeleteMapping("/{id}")
   @Operation(summary = "Delete project", security = [SecurityRequirement(name = "bearer-jwt")])

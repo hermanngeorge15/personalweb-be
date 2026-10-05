@@ -16,6 +16,10 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.server.ResponseStatusException
+import org.springframework.http.server.reactive.ServerHttpResponse
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.context.ReactiveSecurityContextHolder
+import kotlinx.coroutines.reactor.awaitSingleOrNull
 
 @RestController
 @RequestMapping("/api/posts")
@@ -30,9 +34,14 @@ class PostController(private val service: PostService) {
   ) = service.list(limit ?: 10, tag, cursor)
 
   @GetMapping("/{slug}")
-  @Operation(summary = "Get post by slug (public)")
-  suspend fun get(@PathVariable slug: String) =
-    service.getBySlug(slug) ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
+  @Operation(summary = "Get post by slug (public). Drafts only for a signed-in admin or publisher.")
+  suspend fun get(@PathVariable slug: String, response: ServerHttpResponse): PostDetailDto {
+    val includeDrafts = canPreviewDrafts(currentAuthentication())
+    val post = service.getBySlug(slug, includeDrafts) ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
+    // A draft is personal to the signed-in reader: never let a shared cache keep it.
+    if (post.status != "published") response.headers.cacheControl = "private, no-store"
+    return post
+  }
 
   // Admin
   @PostMapping
@@ -42,7 +51,9 @@ class PostController(private val service: PostService) {
 
   @PutMapping("/{id}")
   @Operation(summary = "Update post", security = [SecurityRequirement(name = "bearer-jwt")])
-  suspend fun update(@PathVariable id: UUID, @RequestBody body: PostService.PostUpsertRequest) = service.update(id, body)
+  suspend fun update(@PathVariable id: UUID, @RequestBody body: PostService.PostUpsertRequest) {
+    if (!service.update(id, body)) throw ResponseStatusException(HttpStatus.NOT_FOUND)
+  }
 
   @PutMapping("/by-slug/{slug}")
   @Operation(
@@ -60,4 +71,11 @@ class PostController(private val service: PostService) {
   suspend fun delete(@PathVariable id: UUID) = service.delete(id)
 }
 
+private val DRAFT_READER_ROLES = setOf("ROLE_ADMIN", "ROLE_PUBLISHER")
 
+/** True when [auth] is a signed-in admin or publisher, who may read drafts by slug. */
+internal fun canPreviewDrafts(auth: Authentication?): Boolean =
+  auth != null && auth.isAuthenticated && auth.authorities.any { it.authority in DRAFT_READER_ROLES }
+
+private suspend fun currentAuthentication(): Authentication? =
+  ReactiveSecurityContextHolder.getContext().awaitSingleOrNull()?.authentication

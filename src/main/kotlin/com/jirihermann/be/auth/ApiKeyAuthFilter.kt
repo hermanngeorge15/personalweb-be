@@ -11,6 +11,7 @@ import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.server.WebFilter
 import org.springframework.web.server.WebFilterChain
 import reactor.core.publisher.Mono
+import java.util.Optional
 
 /**
  * Resolves X-API-Key headers into a ROLE_ADMIN-bearing Authentication so
@@ -42,8 +43,15 @@ class ApiKeyAuthFilter(
     val publicId = parts[0]
     val secretHash = sha256Hex(parts[1])
 
+    // Wrap the lookup so "no such key" is a value rather than an empty Mono. The chain must run
+    // exactly once: a `switchIfEmpty(chain.filter(...))` after `flatMap { chain.filter(...) }`
+    // also fires when the authenticated chain completes empty (every Mono<Void> does), which
+    // re-ran the whole request unauthenticated and replaced a successful response with a 401.
     return mono { apiKeyRepo.findActiveByPublicId(publicId) }
-      .flatMap { entity ->
+      .map { Optional.of(it) }
+      .defaultIfEmpty(Optional.empty())
+      .flatMap { found ->
+        val entity = found.orElse(null) ?: return@flatMap chain.filter(exchange)
         if (!constantTimeEquals(entity.key_hash, secretHash)) {
           logger.debug("API key '{}' secret mismatch", publicId)
           return@flatMap chain.filter(exchange)
@@ -64,7 +72,6 @@ class ApiKeyAuthFilter(
         chain.filter(exchange)
           .contextWrite(ReactiveSecurityContextHolder.withSecurityContext(Mono.just(ctx)))
       }
-      .switchIfEmpty(chain.filter(exchange))
   }
 
   companion object {

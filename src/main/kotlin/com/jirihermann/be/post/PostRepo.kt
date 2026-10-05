@@ -21,8 +21,16 @@ interface PostRepo : CoroutineCrudRepository<PostEntity, UUID> {
   )
   suspend fun listPublished(limit: Int, tag: String?, cursor_published_at: java.time.OffsetDateTime?, cursor_slug: String?): List<PostEntity>
 
+  /** Any status. Admin reads and upsert-by-slug only — never for anonymous readers. */
   @Query("""select * from post where slug = :slug and status in ('published','draft')""")
   suspend fun findBySlug(slug: String): PostEntity?
+
+  @Query("""select * from post where slug = :slug and status = 'published'""")
+  suspend fun findPublishedBySlug(slug: String): PostEntity?
+
+  /** Every post, drafts included, newest first. Admin list. */
+  @Query("""select * from post order by coalesce(published_at, updated_at) desc, slug asc""")
+  suspend fun listAll(): List<PostEntity>
 }
 
 

@@ -77,62 +77,8 @@ class SecurityConfig {
           }
       }
       
-      // Authorization rules
-      .authorizeExchange { exchanges ->
-        // Health checks - always public
-        exchanges.pathMatchers(
-          "/actuator/health",
-          "/actuator/health/liveness",
-          "/actuator/health/readiness"
-        ).permitAll()
-        
-        // Prometheus metrics
-        exchanges.pathMatchers("/actuator/prometheus", "/actuator/metrics/**").permitAll()
-        
-        // OpenAPI/Swagger - public for now, consider protecting in production
-        exchanges.pathMatchers(
-          "/swagger-ui.html",
-          "/swagger-ui/**",
-          "/v3/api-docs",
-          "/v3/api-docs/**",
-          "/webjars/**"
-        ).permitAll()
-        
-        // Public GET endpoints (must be before /api/**)
-        exchanges.pathMatchers(HttpMethod.GET, "/api/posts/**").permitAll()
-        exchanges.pathMatchers(HttpMethod.GET, "/api/projects/**").permitAll()
-        exchanges.pathMatchers(HttpMethod.GET, "/api/testimonials/**").permitAll()
-        exchanges.pathMatchers(HttpMethod.GET, "/api/resume/**").permitAll()
-        exchanges.pathMatchers(HttpMethod.GET, "/api/meta").permitAll()
-        exchanges.pathMatchers(HttpMethod.GET, "/api/version").permitAll()
-        exchanges.pathMatchers(HttpMethod.GET, "/api/contact").permitAll()
-        exchanges.pathMatchers(HttpMethod.GET, "/api/learn-kotlin/**").permitAll()
-
-        // Public media fetch (uploads served from /api/media/files/**)
-        exchanges.pathMatchers(HttpMethod.GET, "/api/media/files/**").permitAll()
-
-        // CV generation endpoints (must be before /api/**)
-        exchanges.pathMatchers("/api/cv/**").permitAll()
-        
-        // Public POST endpoints (must be before /api/**)
-        exchanges.pathMatchers(HttpMethod.POST, "/api/contact").permitAll()
-        
-        // Admin-only contact endpoints
-//        exchanges.pathMatchers(HttpMethod.GET, "/api/contact").hasRole("ADMIN")
-//        exchanges.pathMatchers(HttpMethod.POST, "/api/contact/*/handle").hasRole("ADMIN")
-
-        // Publisher (or admin) — create/update posts and upload media.
-        // Must come BEFORE the generic /api/** rule so it wins the match.
-        exchanges.pathMatchers(HttpMethod.POST, "/api/posts").hasAnyRole("ADMIN", "PUBLISHER")
-        exchanges.pathMatchers(HttpMethod.PUT, "/api/posts/**").hasAnyRole("ADMIN", "PUBLISHER")
-        exchanges.pathMatchers(HttpMethod.POST, "/api/media").hasAnyRole("ADMIN", "PUBLISHER")
-
-        // All other /api/** endpoints require ADMIN role (POST, PUT, PATCH, DELETE)
-        exchanges.pathMatchers("/api/**").hasRole("ADMIN")
-        
-        // Deny everything else by default (security-first approach)
-        exchanges.anyExchange().denyAll()
-      }
+      // Authorization rules (see apiAccessRules)
+      .authorizeExchange { it.apiAccessRules() }
       
       // OAuth2 Resource Server with JWT - only authenticate when credentials are present
       .oauth2ResourceServer { rs ->
@@ -211,6 +157,68 @@ class SecurityConfig {
     
     return source
   }
+}
+
+/**
+ * Which roles may call which endpoints. Matchers are checked in order and the first match wins,
+ * so every specific rule must come before the broader one it narrows. Kept separate from
+ * [SecurityConfig.filterChain] so tests can apply the same rules to a minimal filter chain.
+ */
+internal fun ServerHttpSecurity.AuthorizeExchangeSpec.apiAccessRules() {
+  // Health checks - always public
+  pathMatchers(
+    "/actuator/health",
+    "/actuator/health/liveness",
+    "/actuator/health/readiness"
+  ).permitAll()
+
+  // Prometheus metrics
+  pathMatchers("/actuator/prometheus", "/actuator/metrics/**").permitAll()
+
+  // OpenAPI/Swagger - public for now, consider protecting in production
+  pathMatchers(
+    "/swagger-ui.html",
+    "/swagger-ui/**",
+    "/v3/api-docs",
+    "/v3/api-docs/**",
+    "/webjars/**"
+  ).permitAll()
+
+  // Admin views of the Kotlin course (must be before the public /api/learn-kotlin/** rule)
+  pathMatchers(HttpMethod.GET, "/api/learn-kotlin/admin/**").hasRole("ADMIN")
+
+  // Public GET endpoints (must be before /api/**)
+  pathMatchers(HttpMethod.GET, "/api/posts/**").permitAll()
+  pathMatchers(HttpMethod.GET, "/api/projects/**").permitAll()
+  pathMatchers(HttpMethod.GET, "/api/testimonials/**").permitAll()
+  pathMatchers(HttpMethod.GET, "/api/resume/**").permitAll()
+  pathMatchers(HttpMethod.GET, "/api/meta").permitAll()
+  pathMatchers(HttpMethod.GET, "/api/version").permitAll()
+  pathMatchers(HttpMethod.GET, "/api/learn-kotlin/**").permitAll()
+
+  // Public media fetch (uploads served from /api/media/files/**)
+  pathMatchers(HttpMethod.GET, "/api/media/files/**").permitAll()
+
+  // CV generation endpoints (must be before /api/**)
+  pathMatchers("/api/cv/**").permitAll()
+
+  // Public POST endpoints (must be before /api/**)
+  pathMatchers(HttpMethod.POST, "/api/contact").permitAll()
+
+  // Contact messages (GET /api/contact, POST /api/contact/{id}:handle) hold visitors'
+  // names, emails and messages: they fall through to the ADMIN-only /api/** rule below.
+
+  // Publisher (or admin) — create/update posts and upload media.
+  // Must come BEFORE the generic /api/** rule so it wins the match.
+  pathMatchers(HttpMethod.POST, "/api/posts").hasAnyRole("ADMIN", "PUBLISHER")
+  pathMatchers(HttpMethod.PUT, "/api/posts/**").hasAnyRole("ADMIN", "PUBLISHER")
+  pathMatchers(HttpMethod.POST, "/api/media").hasAnyRole("ADMIN", "PUBLISHER")
+
+  // All other /api/** endpoints require ADMIN role (POST, PUT, PATCH, DELETE)
+  pathMatchers("/api/**").hasRole("ADMIN")
+
+  // Deny everything else by default (security-first approach)
+  anyExchange().denyAll()
 }
 
 private fun jwtAuthConverter(): Converter<Jwt, Mono<AbstractAuthenticationToken>> {

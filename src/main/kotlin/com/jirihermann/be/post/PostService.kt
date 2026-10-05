@@ -29,9 +29,14 @@ class PostService(private val repo: PostRepo) {
     PageDto(items = items, nextCursor = nextCursor)
   }
 
-  suspend fun getBySlug(slug: String): PostDetailDto? = withTracing {
-    logger.info("Fetching post by slug: {}", slug)
-    repo.findBySlug(slug)?.let {
+  /**
+   * A post by slug for the blog page. Drafts are returned only when [includeDrafts] is true,
+   * which the controller sets for a signed-in admin or publisher previewing their own draft.
+   */
+  suspend fun getBySlug(slug: String, includeDrafts: Boolean = false): PostDetailDto? = withTracing {
+    logger.info("Fetching post by slug: {}, includeDrafts={}", slug, includeDrafts)
+    val entity = if (includeDrafts) repo.findBySlug(slug) else repo.findPublishedBySlug(slug)
+    entity?.let {
       logger.info("Post found: slug={}, title={}", it.slug, it.title)
       PostDetailDto(
         slug = it.slug,
@@ -50,6 +55,38 @@ class PostService(private val repo: PostRepo) {
   }
 
   // Admin
+  suspend fun listAll(): List<AdminPostListItemDto> = withTracing {
+    repo.listAll().map {
+      AdminPostListItemDto(
+        id = it.id!!, // persisted rows always carry an id
+        slug = it.slug,
+        title = it.title,
+        excerpt = it.excerpt,
+        tags = it.tags,
+        status = it.status,
+        published_at = it.published_at,
+        updated_at = it.updated_at
+      )
+    }
+  }
+
+  suspend fun getAdminBySlug(slug: String): AdminPostDetailDto? = withTracing {
+    repo.findBySlug(slug)?.let {
+      AdminPostDetailDto(
+        id = it.id!!, // persisted rows always carry an id
+        slug = it.slug,
+        title = it.title,
+        excerpt = it.excerpt,
+        content_mdx = it.content_mdx,
+        cover_url = it.cover_url,
+        tags = it.tags,
+        status = it.status,
+        published_at = it.published_at,
+        updated_at = it.updated_at
+      )
+    }
+  }
+
   data class PostUpsertRequest(
     val slug: String,
     val title: String,
@@ -107,7 +144,8 @@ class PostService(private val repo: PostRepo) {
           cover_url = req.cover_url,
           tags = req.tags,
           status = req.status,
-          published_at = req.published_at
+          published_at = req.published_at,
+          updated_at = OffsetDateTime.now()
         )
       )
       logger.info("Post updated via upsert: id={}, slug={}", existing.id, req.slug)
@@ -117,12 +155,13 @@ class PostService(private val repo: PostRepo) {
 
   data class UpsertResult(val id: UUID, val slug: String, val created: Boolean)
 
-  suspend fun update(id: UUID, req: PostUpsertRequest): Unit = withTracing {
+  /** Replaces the post with [id]. Returns false when no such post exists. */
+  suspend fun update(id: UUID, req: PostUpsertRequest): Boolean = withTracing {
     logger.info("Updating post: id={}, slug={}, status={}", id, req.slug, req.status)
     val current = repo.findById(id)
     if (current == null) {
       logger.warn("Post not found for update: id={}", id)
-      return@withTracing
+      return@withTracing false
     }
     repo.save(
       current.copy(
@@ -133,10 +172,12 @@ class PostService(private val repo: PostRepo) {
         cover_url = req.cover_url,
         tags = req.tags,
         status = req.status,
-        published_at = req.published_at
+        published_at = req.published_at,
+        updated_at = OffsetDateTime.now()
       )
     )
     logger.info("Post updated successfully: id={}, slug={}", id, req.slug)
+    true
   }
 
   suspend fun delete(id: UUID): Unit = withTracing {
