@@ -168,7 +168,9 @@ class KotlinLearningController(
         if (id != request.id) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "ID in path must match ID in request body")
         }
-        service.updateTopic(id, request)
+        if (!service.updateTopic(id, request)) {
+            throw ResponseStatusException(HttpStatus.NOT_FOUND, "Topic not found: $id")
+        }
     }
 
     @DeleteMapping("/topics/{id}")
@@ -220,7 +222,13 @@ class KotlinLearningController(
         @PathVariable id: Int,
         @RequestBody request: ExpenseTrackerChapterUpsertRequest
     ) {
-        service.updateChapter(id, request)
+        when (service.updateChapter(id, request)) {
+            ChapterUpdate.UPDATED -> Unit
+            ChapterUpdate.NOT_FOUND ->
+                throw ResponseStatusException(HttpStatus.NOT_FOUND, "Chapter not found: $id")
+            ChapterUpdate.NUMBER_CHANGED ->
+                throw ResponseStatusException(HttpStatus.BAD_REQUEST, "The chapter number cannot be changed")
+        }
     }
 
     @DeleteMapping("/chapters/{id}")

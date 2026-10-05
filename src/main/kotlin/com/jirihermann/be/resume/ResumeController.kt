@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.server.ResponseStatusException
 import java.util.UUID
 
 @RestController
@@ -51,8 +52,9 @@ class ResumeController(private val service: ResumeService) {
 
   @PutMapping("/projects/{id}")
   @Operation(summary = "Update resume project", security = [SecurityRequirement(name = "bearer-jwt")])
-  suspend fun updateProject(@PathVariable id: UUID, @RequestBody req: ResumeService.ProjectUpsertRequest) =
-    service.updateProject(id, req)
+  suspend fun updateProject(@PathVariable id: UUID, @RequestBody req: ResumeService.ProjectUpsertRequest) {
+    if (!service.updateProject(id, req)) throw ResponseStatusException(HttpStatus.NOT_FOUND)
+  }
 
   @DeleteMapping("/projects/{id}")
   @Operation(summary = "Delete resume project", security = [SecurityRequirement(name = "bearer-jwt")])
@@ -72,8 +74,9 @@ class ResumeController(private val service: ResumeService) {
 
   @PutMapping("/certificates/{id}")
   @Operation(summary = "Update certificate", security = [SecurityRequirement(name = "bearer-jwt")])
-  suspend fun updateCertificate(@PathVariable id: UUID, @RequestBody req: ResumeService.CertificateUpsertRequest) =
-    service.updateCertificate(id, req)
+  suspend fun updateCertificate(@PathVariable id: UUID, @RequestBody req: ResumeService.CertificateUpsertRequest) {
+    if (!service.updateCertificate(id, req)) throw ResponseStatusException(HttpStatus.NOT_FOUND)
+  }
 
   @DeleteMapping("/certificates/{id}")
   @Operation(summary = "Delete certificate", security = [SecurityRequirement(name = "bearer-jwt")])
@@ -88,8 +91,9 @@ class ResumeController(private val service: ResumeService) {
 
   @PutMapping("/education/{id}")
   @Operation(summary = "Update education", security = [SecurityRequirement(name = "bearer-jwt")])
-  suspend fun updateEducation(@PathVariable id: UUID, @RequestBody req: ResumeService.EducationUpsertRequest) =
-    service.updateEducation(id, req)
+  suspend fun updateEducation(@PathVariable id: UUID, @RequestBody req: ResumeService.EducationUpsertRequest) {
+    if (!service.updateEducation(id, req)) throw ResponseStatusException(HttpStatus.NOT_FOUND)
+  }
 
   @DeleteMapping("/education/{id}")
   @Operation(summary = "Delete education", security = [SecurityRequirement(name = "bearer-jwt")])
@@ -109,8 +113,9 @@ class ResumeController(private val service: ResumeService) {
 
   @PutMapping("/languages/{id}")
   @Operation(summary = "Update language", security = [SecurityRequirement(name = "bearer-jwt")])
-  suspend fun updateLanguage(@PathVariable id: UUID, @RequestBody req: ResumeService.LanguageUpsertRequest) =
-    service.updateLanguage(id, req)
+  suspend fun updateLanguage(@PathVariable id: UUID, @RequestBody req: ResumeService.LanguageUpsertRequest) {
+    if (!service.updateLanguage(id, req)) throw ResponseStatusException(HttpStatus.NOT_FOUND)
+  }
 
   @DeleteMapping("/languages/{id}")
   @Operation(summary = "Delete language", security = [SecurityRequirement(name = "bearer-jwt")])

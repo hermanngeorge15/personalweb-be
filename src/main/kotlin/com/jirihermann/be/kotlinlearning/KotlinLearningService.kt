@@ -414,12 +414,11 @@ class KotlinLearningService(
     }
 
     /**
-     * Update an existing topic
+     * Update an existing topic. Returns false when no topic has this id.
      */
-    suspend fun updateTopic(id: String, req: KotlinTopicUpsertRequest) = withTracing {
+    suspend fun updateTopic(id: String, req: KotlinTopicUpsertRequest): Boolean = withTracing {
         logger.info("Admin: Updating topic: {}", id)
-        val existing = topicRepo.findById(id)
-            ?: throw IllegalArgumentException("Topic not found: $id")
+        val existing = topicRepo.findById(id) ?: return@withTracing false
 
         val updated = existing.copy(
             title = req.title,
@@ -438,6 +437,7 @@ class KotlinLearningService(
         )
         topicRepo.save(updated)
         logger.info("Admin: Topic updated: {}", id)
+        true
     }
 
     /**
@@ -514,12 +514,13 @@ class KotlinLearningService(
     }
 
     /**
-     * Update an existing expense tracker chapter
+     * Update an existing expense tracker chapter. The chapter number cannot change here:
+     * the neighbours' previous/next links point at it, and renumbering would leave them stale.
      */
-    suspend fun updateChapter(id: Int, req: ExpenseTrackerChapterUpsertRequest) = withTracing {
+    suspend fun updateChapter(id: Int, req: ExpenseTrackerChapterUpsertRequest): ChapterUpdate = withTracing {
         logger.info("Admin: Updating chapter: {}", id)
-        val existing = chapterRepo.findById(id)
-            ?: throw IllegalArgumentException("Chapter not found: $id")
+        val existing = chapterRepo.findById(id) ?: return@withTracing ChapterUpdate.NOT_FOUND
+        if (existing.chapter_number != req.chapterNumber) return@withTracing ChapterUpdate.NUMBER_CHANGED
 
         val updated = existing.copy(
             chapter_number = req.chapterNumber,
@@ -534,6 +535,7 @@ class KotlinLearningService(
         )
         chapterRepo.save(updated)
         logger.info("Admin: Chapter updated: {}", id)
+        ChapterUpdate.UPDATED
     }
 
     /**
@@ -593,3 +595,6 @@ class KotlinLearningService(
         nextChapter = next_chapter
     )
 }
+
+/** Outcome of [KotlinLearningService.updateChapter]. */
+enum class ChapterUpdate { UPDATED, NOT_FOUND, NUMBER_CHANGED }
