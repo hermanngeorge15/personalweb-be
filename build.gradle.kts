@@ -26,6 +26,8 @@ dependencies {
   implementation("io.micrometer:micrometer-registry-prometheus")
 
   implementation("org.jetbrains.kotlin:kotlin-reflect")
+  // Spring Boot registers KotlinModule on its ObjectMapper when this is on the classpath.
+  implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
   implementation("org.flywaydb:flyway-core")
   implementation("org.flywaydb:flyway-database-postgresql:10.10.0")
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.9.0")
