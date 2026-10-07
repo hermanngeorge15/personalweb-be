@@ -4,7 +4,6 @@ import org.flywaydb.core.Flyway
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import java.sql.DriverManager
@@ -15,12 +14,7 @@ class IntegrationFlywayTest {
   companion object {
     @Container
     @JvmStatic
-    val postgres = PostgreSQLContainer<Nothing>("postgres:16-alpine").apply {
-      withDatabaseName("personal")
-      withUsername("personal")
-      withPassword("personal")
-      start()
-    }
+    val postgres = postgresContainer().apply { start() }
   }
 
   @Test
