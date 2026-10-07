@@ -189,6 +189,8 @@ internal fun ServerHttpSecurity.AuthorizeExchangeSpec.apiAccessRules() {
 
   // Public GET endpoints (must be before /api/**)
   pathMatchers(HttpMethod.GET, "/api/posts/**").permitAll()
+  // Blog RSS feed: GET of this one path only. It lists published posts for every reader.
+  pathMatchers(HttpMethod.GET, "/api/rss.xml").permitAll()
   pathMatchers(HttpMethod.GET, "/api/projects/**").permitAll()
   pathMatchers(HttpMethod.GET, "/api/testimonials/**").permitAll()
   pathMatchers(HttpMethod.GET, "/api/resume/**").permitAll()
