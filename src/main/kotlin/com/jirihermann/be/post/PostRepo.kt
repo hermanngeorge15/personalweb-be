@@ -25,6 +25,22 @@ interface PostRepo : CoroutineCrudRepository<PostEntity, UUID> {
   @Query("""select * from post where slug = :slug and status in ('published','draft')""")
   suspend fun findBySlug(slug: String): PostEntity?
 
+  /**
+   * The RSS feed: published posts whose publication time has come, newest first. Drafts, posts
+   * scheduled after [now] and published posts without a date never match.
+   */
+  @Query(
+    """
+    select * from post
+    where status = 'published'
+      and published_at is not null
+      and published_at <= :now
+    order by published_at desc, slug asc
+    limit :limit
+    """
+  )
+  suspend fun listFeed(now: java.time.OffsetDateTime, limit: Int): List<PostEntity>
+
   @Query("""select * from post where slug = :slug and status = 'published'""")
   suspend fun findPublishedBySlug(slug: String): PostEntity?
 

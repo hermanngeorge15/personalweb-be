@@ -69,6 +69,19 @@ class ApiAccessRulesTest {
   }
 
   @Test
+  fun `should let anyone read the RSS feed and nothing more`() {
+    client.get().uri("/api/rss.xml").exchange().expectStatus().isOk
+    client.post().uri("/api/rss.xml").exchange().expectStatus().isUnauthorized
+    client.put().uri("/api/rss.xml").exchange().expectStatus().isUnauthorized
+    client.delete().uri("/api/rss.xml").exchange().expectStatus().isUnauthorized
+    asRole("PUBLISHER").post().uri("/api/rss.xml").exchange().expectStatus().isForbidden
+    // The rule names one path: nothing below or beside it becomes public.
+    client.get().uri("/api/rss.xml/drafts").exchange().expectStatus().isUnauthorized
+    client.get().uri("/api/rss").exchange().expectStatus().isUnauthorized
+    client.get().uri("/api/admin/posts").exchange().expectStatus().isUnauthorized
+  }
+
+  @Test
   fun `should let publishers write posts but not delete them`() {
     client.put().uri("/api/posts/1").exchange().expectStatus().isUnauthorized
     asRole("PUBLISHER").put().uri("/api/posts/1").exchange().expectStatus().isOk
