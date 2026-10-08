@@ -2,6 +2,11 @@ package com.jirihermann.be.email
 
 import com.jirihermann.be.config.AwsSesProperties
 import com.jirihermann.be.config.EmailProperties
+import com.jirihermann.be.logging.LogRedaction.fingerprint
+import com.jirihermann.be.metrics.BusinessMetrics
+import com.jirihermann.be.metrics.BusinessMetrics.EmailResult
+import com.jirihermann.be.metrics.BusinessMetrics.EmailType
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.slf4j.LoggerFactory
@@ -13,21 +18,29 @@ import software.amazon.awssdk.services.ses.model.*
 class EmailService(
   private val sesClient: SesClient?,
   private val awsSesProperties: AwsSesProperties,
-  private val emailProperties: EmailProperties
+  private val emailProperties: EmailProperties,
+  private val metrics: BusinessMetrics,
 ) {
   private val logger = LoggerFactory.getLogger(EmailService::class.java)
 
   /**
    * Send a simple text email
    */
-  suspend fun sendEmail(request: EmailRequest): Boolean {
+  suspend fun sendEmail(request: EmailRequest): Boolean = send(request, EmailType.GENERIC)
+
+  /**
+   * Sends [request] and counts the outcome as `blog.email.sent{type, result}`. Recipient
+   * addresses are logged only as fingerprints.
+   */
+  private suspend fun send(request: EmailRequest, type: EmailType): Boolean {
     if (sesClient == null || !awsSesProperties.enabled) {
-      logger.warn("SES is disabled. Email not sent to: ${request.to}")
+      logger.warn("SES is disabled. Email not sent to: {}", fingerprint(request.to))
+      metrics.emailSent(type, EmailResult.DISABLED)
       return false
     }
 
-    logger.info("Sending email to: {}, subject: {}", request.to, request.subject)
-    return try {
+    logger.info("Sending email to: {}, subject: {}", fingerprint(request.to), request.subject)
+    val sent = try {
       withContext(Dispatchers.IO) {
         val destination = Destination.builder()
           .toAddresses(request.to)
@@ -62,38 +75,43 @@ class EmailService(
         }
 
         val response = sesClient.sendEmail(sendRequestBuilder.build())
-        logger.info("Email sent successfully to: ${request.to}, MessageId: ${response.messageId()}")
+        logger.info("Email sent successfully to: {}, MessageId: {}", fingerprint(request.to), response.messageId())
         true
       }
+    } catch (e: CancellationException) {
+      throw e
     } catch (e: Exception) {
-      logger.error("Failed to send email to: ${request.to}", e)
+      logger.error("Failed to send email to: {}", fingerprint(request.to), e)
       false
     }
+    metrics.emailSent(type, if (sent) EmailResult.SENT else EmailResult.FAILED)
+    return sent
   }
 
   /**
    * Send contact form notification to admin
    */
   suspend fun sendContactFormNotification(data: ContactFormEmailData): Boolean {
-    logger.info("Sending contact form notification: from={}, name={}", data.email, data.name)
+    logger.info("Sending contact form notification: from={}", fingerprint(data.email))
     val subject = emailProperties.contactSubject
     val textBody = buildContactFormTextBody(data)
     val htmlBody = buildContactFormHtmlBody(data)
 
-    val result = sendEmail(
+    val result = send(
       EmailRequest(
         to = emailProperties.adminEmail,
         subject = subject,
         body = textBody,
         htmlBody = htmlBody,
         replyTo = data.email
-      )
+      ),
+      EmailType.CONTACT_NOTIFICATION,
     )
     
     if (result) {
-      logger.info("Contact form notification sent successfully: from={}", data.email)
+      logger.info("Contact form notification sent successfully: from={}", fingerprint(data.email))
     } else {
-      logger.error("Failed to send contact form notification: from={}", data.email)
+      logger.error("Failed to send contact form notification: from={}", fingerprint(data.email))
     }
     
     return result

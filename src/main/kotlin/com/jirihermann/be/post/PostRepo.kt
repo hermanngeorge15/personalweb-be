@@ -31,6 +31,9 @@ interface PostRepo : CoroutineCrudRepository<PostEntity, UUID> {
   /** Every post, drafts included, newest first. Admin list. */
   @Query("""select * from post order by coalesce(published_at, updated_at) desc, slug asc""")
   suspend fun listAll(): List<PostEntity>
+
+  @Query("""select count(*) from post where status = :status""")
+  suspend fun countByStatus(status: String): Long
 }
 
 

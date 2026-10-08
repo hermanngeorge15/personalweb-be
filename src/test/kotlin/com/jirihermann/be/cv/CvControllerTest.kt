@@ -1,5 +1,7 @@
 package com.jirihermann.be.cv
 
+import com.jirihermann.be.metrics.BusinessMetrics
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import io.mockk.coEvery
 import io.mockk.mockk
 import org.junit.jupiter.api.Test
@@ -9,7 +11,7 @@ import org.springframework.test.web.reactive.server.WebTestClient
 class CvControllerTest {
   private val assembler: CvAssembler = mockk()
   private val renderer: PdfRenderer = mockk()
-  private val client = WebTestClient.bindToController(CvController(assembler, renderer)).build()
+  private val client = WebTestClient.bindToController(CvController(assembler, renderer, BusinessMetrics(SimpleMeterRegistry()))).build()
 
   @Test
   fun pdf_ok() {

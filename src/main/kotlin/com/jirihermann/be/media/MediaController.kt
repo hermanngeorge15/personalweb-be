@@ -1,5 +1,7 @@
 package com.jirihermann.be.media
 
+import com.jirihermann.be.metrics.BusinessMetrics
+import com.jirihermann.be.metrics.BusinessMetrics.MediaUploadResult
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -24,7 +26,7 @@ import java.nio.file.Files
 @RestController
 @RequestMapping("/api/media")
 @Tag(name = "Media")
-class MediaController(private val service: MediaService) {
+class MediaController(private val service: MediaService, private val metrics: BusinessMetrics) {
 
   @PostMapping(consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
   @Operation(summary = "Upload a media file (admin)", security = [SecurityRequirement(name = "bearer-jwt")])
@@ -32,7 +34,13 @@ class MediaController(private val service: MediaService) {
     @RequestPart("file") file: FilePart,
     @RequestParam("folder", required = false) folder: String?,
   ): Mono<UploadResult> =
-    service.store(file, folder)
+    // defer: store() can also throw before it returns a Mono; count that as a failed upload too.
+    Mono.defer { service.store(file, folder) }
+      .doOnSuccess { metrics.mediaUpload(MediaUploadResult.SUCCESS) }
+      .doOnError { ex ->
+        // IllegalArgumentException is a rejected file (type or size); anything else is a failure.
+        metrics.mediaUpload(if (ex is IllegalArgumentException) MediaUploadResult.REJECTED else MediaUploadResult.FAILED)
+      }
       .onErrorMap(IllegalArgumentException::class.java) { ex ->
         ResponseStatusException(HttpStatus.BAD_REQUEST, ex.message)
       }

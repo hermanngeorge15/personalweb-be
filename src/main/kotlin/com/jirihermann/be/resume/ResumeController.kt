@@ -1,5 +1,8 @@
 package com.jirihermann.be.resume
 
+import com.jirihermann.be.metrics.BusinessMetrics
+import com.jirihermann.be.metrics.BusinessMetrics.AdminAction
+import com.jirihermann.be.metrics.BusinessMetrics.AdminEntity
 import com.jirihermann.be.resume.entity.ResumeCertificateEntity
 import com.jirihermann.be.resume.entity.ResumeEducationEntity
 import com.jirihermann.be.resume.entity.ResumeHobbiesEntity
@@ -24,7 +27,10 @@ import java.util.UUID
 @RestController
 @RequestMapping("/api/resume")
 @Tag(name = "Resume")
-class ResumeController(private val service: ResumeService) {
+class ResumeController(private val service: ResumeService, private val metrics: BusinessMetrics) {
+  /** Every resume section (projects, hobbies, certificates, education, languages) counts as `resume`. */
+  private fun resumeChange(action: AdminAction) = metrics.adminChange(AdminEntity.RESUME, action)
+
 
   // Public
   @GetMapping("/projects")
@@ -48,57 +54,69 @@ class ResumeController(private val service: ResumeService) {
   @Operation(summary = "Create resume project", security = [SecurityRequirement(name = "bearer-jwt")])
   @ResponseStatus(HttpStatus.CREATED)
   suspend fun createProject(@RequestBody req: ResumeService.ProjectUpsertRequest): UUID =
-    service.createProject(req)
+    service.createProject(req).also { resumeChange(AdminAction.CREATE) }
 
   @PutMapping("/projects/{id}")
   @Operation(summary = "Update resume project", security = [SecurityRequirement(name = "bearer-jwt")])
   suspend fun updateProject(@PathVariable id: UUID, @RequestBody req: ResumeService.ProjectUpsertRequest) {
     if (!service.updateProject(id, req)) throw ResponseStatusException(HttpStatus.NOT_FOUND)
+    resumeChange(AdminAction.UPDATE)
   }
 
   @DeleteMapping("/projects/{id}")
   @Operation(summary = "Delete resume project", security = [SecurityRequirement(name = "bearer-jwt")])
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  suspend fun deleteProject(@PathVariable id: UUID) = service.deleteProject(id)
+  suspend fun deleteProject(@PathVariable id: UUID) {
+    service.deleteProject(id)
+    resumeChange(AdminAction.DELETE)
+  }
 
   @PutMapping("/hobbies")
   @Operation(summary = "Upsert hobbies", security = [SecurityRequirement(name = "bearer-jwt")])
   suspend fun upsertHobbies(@RequestBody req: ResumeService.HobbiesUpsertRequest): UUID =
-    service.upsertHobbies(req)
+    service.upsertHobbies(req).also { resumeChange(AdminAction.UPDATE) }
 
   @PostMapping("/certificates")
   @Operation(summary = "Create certificate", security = [SecurityRequirement(name = "bearer-jwt")])
   @ResponseStatus(HttpStatus.CREATED)
   suspend fun createCertificate(@RequestBody req: ResumeService.CertificateUpsertRequest): UUID =
-    service.createCertificate(req)
+    service.createCertificate(req).also { resumeChange(AdminAction.CREATE) }
 
   @PutMapping("/certificates/{id}")
   @Operation(summary = "Update certificate", security = [SecurityRequirement(name = "bearer-jwt")])
   suspend fun updateCertificate(@PathVariable id: UUID, @RequestBody req: ResumeService.CertificateUpsertRequest) {
     if (!service.updateCertificate(id, req)) throw ResponseStatusException(HttpStatus.NOT_FOUND)
+    resumeChange(AdminAction.UPDATE)
   }
 
   @DeleteMapping("/certificates/{id}")
   @Operation(summary = "Delete certificate", security = [SecurityRequirement(name = "bearer-jwt")])
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  suspend fun deleteCertificate(@PathVariable id: UUID) = service.deleteCertificate(id)
+  suspend fun deleteCertificate(@PathVariable id: UUID) {
+    service.deleteCertificate(id)
+    resumeChange(AdminAction.DELETE)
+  }
 
   @PostMapping("/education")
   @Operation(summary = "Create education", security = [SecurityRequirement(name = "bearer-jwt")])
   @ResponseStatus(HttpStatus.CREATED)
   suspend fun createEducation(@RequestBody req: ResumeService.EducationUpsertRequest): UUID =
-    service.createEducation(req)
+    service.createEducation(req).also { resumeChange(AdminAction.CREATE) }
 
   @PutMapping("/education/{id}")
   @Operation(summary = "Update education", security = [SecurityRequirement(name = "bearer-jwt")])
   suspend fun updateEducation(@PathVariable id: UUID, @RequestBody req: ResumeService.EducationUpsertRequest) {
     if (!service.updateEducation(id, req)) throw ResponseStatusException(HttpStatus.NOT_FOUND)
+    resumeChange(AdminAction.UPDATE)
   }
 
   @DeleteMapping("/education/{id}")
   @Operation(summary = "Delete education", security = [SecurityRequirement(name = "bearer-jwt")])
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  suspend fun deleteEducation(@PathVariable id: UUID) = service.deleteEducation(id)
+  suspend fun deleteEducation(@PathVariable id: UUID) {
+    service.deleteEducation(id)
+    resumeChange(AdminAction.DELETE)
+  }
 
   // Languages with level
   @GetMapping("/languages")
@@ -109,16 +127,20 @@ class ResumeController(private val service: ResumeService) {
   @Operation(summary = "Create language", security = [SecurityRequirement(name = "bearer-jwt")])
   @ResponseStatus(HttpStatus.CREATED)
   suspend fun createLanguage(@RequestBody req: ResumeService.LanguageUpsertRequest): UUID =
-    service.createLanguage(req)
+    service.createLanguage(req).also { resumeChange(AdminAction.CREATE) }
 
   @PutMapping("/languages/{id}")
   @Operation(summary = "Update language", security = [SecurityRequirement(name = "bearer-jwt")])
   suspend fun updateLanguage(@PathVariable id: UUID, @RequestBody req: ResumeService.LanguageUpsertRequest) {
     if (!service.updateLanguage(id, req)) throw ResponseStatusException(HttpStatus.NOT_FOUND)
+    resumeChange(AdminAction.UPDATE)
   }
 
   @DeleteMapping("/languages/{id}")
   @Operation(summary = "Delete language", security = [SecurityRequirement(name = "bearer-jwt")])
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  suspend fun deleteLanguage(@PathVariable id: UUID) = service.deleteLanguage(id)
+  suspend fun deleteLanguage(@PathVariable id: UUID) {
+    service.deleteLanguage(id)
+    resumeChange(AdminAction.DELETE)
+  }
 }

@@ -7,6 +7,9 @@ import java.util.UUID
 interface ContactMessageRepo : CoroutineCrudRepository<ContactMessageEntity, UUID> {
   @Query("""select * from contact_message where handled = false""")
   suspend fun listUnHandled(): List<ContactMessageEntity>
+
+  @Query("""select count(*) from contact_message where handled = false""")
+  suspend fun countUnhandled(): Long
 }
 
 

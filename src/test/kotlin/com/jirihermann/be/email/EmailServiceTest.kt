@@ -1,8 +1,11 @@
 package com.jirihermann.be.email
 
+import com.jirihermann.be.metrics.BusinessMetrics
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import com.jirihermann.be.config.AwsSesProperties
 import com.jirihermann.be.config.EmailProperties
 import io.mockk.*
+import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.test.runTest
@@ -21,6 +24,8 @@ class EmailServiceTest {
   private lateinit var awsSesProperties: AwsSesProperties
   private lateinit var emailProperties: EmailProperties
   private lateinit var emailService: EmailService
+  private lateinit var registry: SimpleMeterRegistry
+  private lateinit var metrics: BusinessMetrics
 
   @BeforeEach
   fun setup() {
@@ -35,7 +40,9 @@ class EmailServiceTest {
       adminEmail = "admin@example.com",
       contactSubject = "Test Contact Subject"
     )
-    emailService = EmailService(sesClient, awsSesProperties, emailProperties)
+    registry = SimpleMeterRegistry()
+    metrics = BusinessMetrics(registry)
+    emailService = EmailService(sesClient, awsSesProperties, emailProperties, metrics)
   }
 
   @AfterEach
@@ -63,6 +70,7 @@ class EmailServiceTest {
 
     // Then
     assertTrue(result)
+    assertEquals(1.0, emailCount("generic", "sent"))
     verify(exactly = 1) { sesClient.sendEmail(any<SendEmailRequest>()) }
   }
 
@@ -122,7 +130,7 @@ class EmailServiceTest {
   fun `sendEmail should return false when SES is disabled`() = runTest {
     // Given
     val disabledProperties = awsSesProperties.copy(enabled = false)
-    val disabledService = EmailService(null, disabledProperties, emailProperties)
+    val disabledService = EmailService(null, disabledProperties, emailProperties, metrics)
     
     val request = EmailRequest(
       to = "recipient@example.com",
@@ -135,6 +143,7 @@ class EmailServiceTest {
 
     // Then
     assertFalse(result)
+    assertEquals(1.0, emailCount("generic", "disabled"))
   }
 
   @Test
@@ -154,6 +163,7 @@ class EmailServiceTest {
 
     // Then
     assertFalse(result)
+    assertEquals(1.0, emailCount("generic", "failed"))
     verify(exactly = 1) { sesClient.sendEmail(any<SendEmailRequest>()) }
   }
 
@@ -178,6 +188,8 @@ class EmailServiceTest {
 
     // Then
     assertTrue(result)
+    assertEquals(1.0, emailCount("contact_notification", "sent"))
+    assertEquals(0.0, emailCount("generic", "sent"))
     verify(exactly = 1) { 
       sesClient.sendEmail(match<SendEmailRequest> { 
         it.destination().toAddresses().contains("admin@example.com") &&
@@ -253,7 +265,7 @@ class EmailServiceTest {
   @Test
   fun `service should not throw exception when SES client is null`() = runTest {
     // Given
-    val nullClientService = EmailService(null, awsSesProperties, emailProperties)
+    val nullClientService = EmailService(null, awsSesProperties, emailProperties, metrics)
     val request = EmailRequest(
       to = "test@example.com",
       subject = "Test",
@@ -266,5 +278,7 @@ class EmailServiceTest {
       assertFalse(result)
     }
   }
-}
 
+  private fun emailCount(type: String, result: String): Double =
+    registry.get(BusinessMetrics.EMAIL_SENT).tags("type", type, "result", result).counter().count()
+}

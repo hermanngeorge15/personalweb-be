@@ -88,9 +88,12 @@ object CvLabels {
     "last_updated" to "Naposledy aktualizováno"
   )
 
-  fun forLang(lang: String): Map<String, String> = when (lang.lowercase()) {
-    "cz", "cs" -> cz
-    else -> en
+  fun forLang(lang: String): Map<String, String> = if (languageCode(lang) == "cs") cz else en
+
+  /** The language a CV requested as [lang] is rendered in: `cs` for "cz"/"cs", otherwise `en`. */
+  fun languageCode(lang: String): String = when (lang.lowercase()) {
+    "cz", "cs" -> "cs"
+    else -> "en"
   }
 }
 

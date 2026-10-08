@@ -1,5 +1,7 @@
 package com.jirihermann.be
 
+import com.jirihermann.be.metrics.BusinessMetrics
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import com.jirihermann.be.kotlinlearning.ChapterUpdate
 import com.jirihermann.be.kotlinlearning.KotlinLearningController
 import com.jirihermann.be.kotlinlearning.KotlinLearningService
@@ -19,8 +21,9 @@ import java.util.UUID
 class AdminUpdateStatusTest {
   private val kotlinLearning: KotlinLearningService = mockk()
   private val resume: ResumeService = mockk()
+  private val metrics = BusinessMetrics(SimpleMeterRegistry())
   private val client = WebTestClient
-    .bindToController(KotlinLearningController(kotlinLearning, mockk()), ResumeController(resume))
+    .bindToController(KotlinLearningController(kotlinLearning, mockk(), metrics), ResumeController(resume, metrics))
     .build()
 
   private val topicJson = """
