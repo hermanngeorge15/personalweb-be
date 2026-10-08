@@ -1,5 +1,6 @@
 package com.jirihermann.be.cv
 
+import com.jirihermann.be.metrics.BusinessMetrics
 import org.springframework.http.CacheControl
 import org.springframework.http.ContentDisposition
 import org.springframework.http.HttpHeaders
@@ -15,7 +16,8 @@ import java.util.concurrent.TimeUnit
 @RestController
 class CvController(
   private val assembler: CvAssembler,
-  private val renderer: PdfRenderer
+  private val renderer: PdfRenderer,
+  private val metrics: BusinessMetrics,
 ) {
 
   @GetMapping("/api/cv/{slug}.{lang}.pdf")
@@ -35,6 +37,7 @@ class CvController(
         .build()
     }
 
+    metrics.cvDownload(slug, CvLabels.languageCode(lang))
     return ResponseEntity.ok().headers(headers).body(pdf)
   }
 

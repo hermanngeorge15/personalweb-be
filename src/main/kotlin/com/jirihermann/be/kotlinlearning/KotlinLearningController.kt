@@ -1,5 +1,11 @@
 package com.jirihermann.be.kotlinlearning
 
+import com.jirihermann.be.metrics.BusinessMetrics
+import com.jirihermann.be.metrics.BusinessMetrics.AdminAction
+import com.jirihermann.be.metrics.BusinessMetrics.AdminEntity
+import com.jirihermann.be.metrics.BusinessMetrics.LearnKind
+import com.jirihermann.be.metrics.isLikelyBot
+import org.springframework.web.bind.annotation.RequestHeader
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -20,8 +26,14 @@ import org.springframework.web.server.ResponseStatusException
 @Tag(name = "Kotlin Learning", description = "Interactive Kotlin learning platform for Java and C# developers")
 class KotlinLearningController(
     private val service: KotlinLearningService,
-    private val playgroundService: KotlinPlaygroundService
+    private val playgroundService: KotlinPlaygroundService,
+    private val metrics: BusinessMetrics,
 ) {
+    /** Counts a view of content that exists, unless the reader is an obvious bot. */
+    private fun countView(kind: LearnKind, slug: String, userAgent: String?) {
+        if (!isLikelyBot(userAgent)) metrics.learnView(kind, slug)
+    }
+
 
     @GetMapping("/topics")
     @Operation(
@@ -48,10 +60,13 @@ class KotlinLearningController(
             description = "Source language for code comparisons: 'java' or 'csharp'. If not specified, returns all examples.",
             example = "java"
         )
-        @RequestParam(required = false) sourceLanguage: String?
+        @RequestParam(required = false) sourceLanguage: String?,
+        @RequestHeader(value = "User-Agent", required = false) userAgent: String? = null,
     ): KotlinTopicDetailDto {
-        return service.getTopic(id, sourceLanguage)
+        val topic = service.getTopic(id, sourceLanguage)
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Topic not found: $id")
+        countView(LearnKind.TOPIC, id, userAgent)
+        return topic
     }
 
     @GetMapping("/mindmap")
@@ -81,10 +96,13 @@ class KotlinLearningController(
             description = "Tier level (1-4). If not specified, returns all available tiers.",
             example = "2"
         )
-        @RequestParam(required = false) tier: Int?
+        @RequestParam(required = false) tier: Int?,
+        @RequestHeader(value = "User-Agent", required = false) userAgent: String? = null,
     ): KotlinTopicWithTiersDto {
-        return service.getTopicWithTiers(id, sourceLanguage, tier)
+        val topic = service.getTopicWithTiers(id, sourceLanguage, tier)
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Topic not found: $id")
+        countView(LearnKind.TOPIC, id, userAgent)
+        return topic
     }
 
     // =====================================================
@@ -104,10 +122,13 @@ class KotlinLearningController(
         description = "Returns full chapter content with linked topics and implementation steps"
     )
     suspend fun getExpenseTrackerChapter(
-        @PathVariable chapterNumber: Int
+        @PathVariable chapterNumber: Int,
+        @RequestHeader(value = "User-Agent", required = false) userAgent: String? = null,
     ): ExpenseTrackerChapterDetailDto {
-        return service.getExpenseTrackerChapter(chapterNumber)
+        val chapter = service.getExpenseTrackerChapter(chapterNumber)
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Chapter not found: $chapterNumber")
+        countView(LearnKind.CHAPTER, chapterNumber.toString(), userAgent)
+        return chapter
     }
 
     // =====================================================
@@ -153,6 +174,7 @@ class KotlinLearningController(
     )
     suspend fun createTopic(@RequestBody request: KotlinTopicUpsertRequest): Map<String, String> {
         val id = service.createTopic(request)
+        metrics.adminChange(AdminEntity.TOPIC, AdminAction.CREATE)
         return mapOf("id" to id)
     }
 
@@ -171,6 +193,7 @@ class KotlinLearningController(
         if (!service.updateTopic(id, request)) {
             throw ResponseStatusException(HttpStatus.NOT_FOUND, "Topic not found: $id")
         }
+        metrics.adminChange(AdminEntity.TOPIC, AdminAction.UPDATE)
     }
 
     @DeleteMapping("/topics/{id}")
@@ -180,6 +203,7 @@ class KotlinLearningController(
     )
     suspend fun deleteTopic(@PathVariable id: String) {
         service.deleteTopic(id)
+        metrics.adminChange(AdminEntity.TOPIC, AdminAction.DELETE)
     }
 
     // =====================================================
@@ -210,6 +234,7 @@ class KotlinLearningController(
     )
     suspend fun createChapter(@RequestBody request: ExpenseTrackerChapterUpsertRequest): Map<String, Int> {
         val id = service.createChapter(request)
+        metrics.adminChange(AdminEntity.CHAPTER, AdminAction.CREATE)
         return mapOf("id" to id)
     }
 
@@ -223,7 +248,7 @@ class KotlinLearningController(
         @RequestBody request: ExpenseTrackerChapterUpsertRequest
     ) {
         when (service.updateChapter(id, request)) {
-            ChapterUpdate.UPDATED -> Unit
+            ChapterUpdate.UPDATED -> metrics.adminChange(AdminEntity.CHAPTER, AdminAction.UPDATE)
             ChapterUpdate.NOT_FOUND ->
                 throw ResponseStatusException(HttpStatus.NOT_FOUND, "Chapter not found: $id")
             ChapterUpdate.NUMBER_CHANGED ->
@@ -238,5 +263,6 @@ class KotlinLearningController(
     )
     suspend fun deleteChapter(@PathVariable id: Int) {
         service.deleteChapter(id)
+        metrics.adminChange(AdminEntity.CHAPTER, AdminAction.DELETE)
     }
 }

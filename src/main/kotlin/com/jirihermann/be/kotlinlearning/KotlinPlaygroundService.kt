@@ -1,6 +1,9 @@
 package com.jirihermann.be.kotlinlearning
 
 import com.jirihermann.be.config.KotlinPlaygroundProperties
+import com.jirihermann.be.metrics.BusinessMetrics
+import com.jirihermann.be.metrics.BusinessMetrics.PlaygroundResult
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.reactor.awaitSingle
 import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
@@ -11,13 +14,15 @@ import java.time.Duration
 @Service
 class KotlinPlaygroundService(
     private val properties: KotlinPlaygroundProperties,
-    private val webClient: WebClient
+    private val webClient: WebClient,
+    private val metrics: BusinessMetrics,
 ) {
     private val logger = LoggerFactory.getLogger(KotlinPlaygroundService::class.java)
 
     suspend fun executeCode(code: String): ExecuteCodeResponse {
         if (!properties.enabled) {
             logger.warn("Kotlin Playground code execution is disabled")
+            metrics.playgroundExecution(PlaygroundResult.DISABLED)
             return ExecuteCodeResponse(
                 output = null,
                 errors = listOf("Code execution is disabled"),
@@ -54,6 +59,13 @@ class KotlinPlaygroundService(
 
             val errors = response.errors?.let { parseErrors(it) } ?: emptyList()
             val hasErrors = errors.isNotEmpty() || response.exception != null
+            metrics.playgroundExecution(
+                when {
+                    errors.isNotEmpty() -> PlaygroundResult.COMPILE_ERROR
+                    response.exception != null -> PlaygroundResult.FAILED
+                    else -> PlaygroundResult.SUCCESS
+                }
+            )
 
             ExecuteCodeResponse(
                 output = response.text?.trimEnd(),
@@ -62,8 +74,11 @@ class KotlinPlaygroundService(
                 } else null,
                 success = !hasErrors
             )
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             logger.error("Failed to execute Kotlin code", e)
+            metrics.playgroundExecution(PlaygroundResult.FAILED)
             ExecuteCodeResponse(
                 output = null,
                 errors = listOf("Execution failed: ${e.message}"),

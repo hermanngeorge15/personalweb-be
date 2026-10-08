@@ -1,5 +1,8 @@
 package com.jirihermann.be.project
 
+import com.jirihermann.be.metrics.BusinessMetrics
+import com.jirihermann.be.metrics.BusinessMetrics.AdminAction
+import com.jirihermann.be.metrics.BusinessMetrics.AdminEntity
 import org.springframework.web.server.ResponseStatusException
 import java.util.UUID
 import io.swagger.v3.oas.annotations.Operation
@@ -19,7 +22,7 @@ import org.springframework.web.bind.annotation.ResponseStatus
 @RestController
 @RequestMapping("/api/projects")
 @Tag(name = "Projects")
-class ProjectController(private val service: ProjectService) {
+class ProjectController(private val service: ProjectService, private val metrics: BusinessMetrics) {
   @GetMapping
   @Operation(summary = "List projects (public)")
   suspend fun list() = service.list()
@@ -28,18 +31,26 @@ class ProjectController(private val service: ProjectService) {
   @PostMapping
   @Operation(summary = "Create project", security = [SecurityRequirement(name = "bearer-jwt")])
   @ResponseStatus(HttpStatus.CREATED)
-  suspend fun create(@RequestBody body: ProjectService.ProjectUpsertRequest) = mapOf("id" to service.create(body))
+  suspend fun create(@RequestBody body: ProjectService.ProjectUpsertRequest): Map<String, UUID> {
+    val id = service.create(body)
+    metrics.adminChange(AdminEntity.PROJECT, AdminAction.CREATE)
+    return mapOf("id" to id)
+  }
 
   @PutMapping("/{id}")
   @Operation(summary = "Update project", security = [SecurityRequirement(name = "bearer-jwt")])
   suspend fun update(@PathVariable id: UUID, @RequestBody body: ProjectService.ProjectUpsertRequest) {
     if (!service.update(id, body)) throw ResponseStatusException(HttpStatus.NOT_FOUND)
+    metrics.adminChange(AdminEntity.PROJECT, AdminAction.UPDATE)
   }
 
   @DeleteMapping("/{id}")
   @Operation(summary = "Delete project", security = [SecurityRequirement(name = "bearer-jwt")])
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  suspend fun delete(@PathVariable id: UUID) = service.delete(id)
+  suspend fun delete(@PathVariable id: UUID) {
+    service.delete(id)
+    metrics.adminChange(AdminEntity.PROJECT, AdminAction.DELETE)
+  }
 }
 
 
